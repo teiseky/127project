@@ -213,6 +213,7 @@ router.get('/4', async (req, res) => {
         where: { organizationId: organization },
         through: {
           model: ServesIn,
+          attributes: ['role'], // Include the role attribute
           where: {
             committee: 'Executive',
             academicYear  
@@ -228,7 +229,14 @@ router.get('/4', async (req, res) => {
       ]
     });
 
-    res.json(members);
+    // Format the response to show member info and their role in the org
+    const formatted = members.map(member => ({
+      studentNumber: member.studentNumber,
+      name: member.name,
+      role: member.Organizations[0]?.ServesIn?.role || 'Unknown'
+    }));
+
+    res.json(formatted);
   } catch (error) {
     handleError(res, error);
   }
