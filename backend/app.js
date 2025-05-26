@@ -1,0 +1,34 @@
+const express = require('express');
+const cors = require('cors');
+const app = express();
+
+// Enable CORS for all routes
+app.use(cors());
+
+// Parse JSON bodies
+app.use(express.json());
+
+// Import routes
+const memberRoutes = require('./routes/members');
+const organizationRoutes = require('./routes/organizations');
+const feeRoutes = require('./routes/fees');
+const reportsRoutes = require('./routes/reports');
+
+// Use routes
+app.use('/api/members', memberRoutes);
+app.use('/api/organizations', organizationRoutes);
+app.use('/api/fees', feeRoutes);
+app.use('/api/reports', reportsRoutes);
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Something broke!' });
+});
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
+
+module.exports = app; 
