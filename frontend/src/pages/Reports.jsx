@@ -48,12 +48,17 @@ const Reports = () => {
         setError('Please select an organization');
         setLoading(false);
         return;
+      } else if (reportType === '2' && (!filters.organization || !filters.semester || !filters.academicYear)) {
+        setError('Please select organization, semester, and academic year for unpaid fees report');
+        setLoading(false);
+        return;
       }
-
+      
       const response = await axios.get(`http://localhost:5000/api/reports/${reportType}`, {
         params: filters
       });
       setReportData(response.data);
+      console.log('Report data fetched:', response.data);
     } catch (error) {
       console.error('Error fetching report:', error);
       setError(
@@ -67,10 +72,11 @@ const Reports = () => {
   };
 
   const handleReportChange = (event) => {
-    setReportType(event.target.value);
+    const newReportType = event.target.value;
+    setReportType(newReportType);
     setFilters({
       organization: '',
-      semester: '',
+      semester: newReportType === '2' ? '1st' : '', // Default to 1st semester for unpaid fees report
       academicYear: '',
       role: '',
       status: '',
@@ -84,6 +90,10 @@ const Reports = () => {
 
   const handleFilterChange = (event) => {
     setFilters({
+      ...filters,
+      [event.target.name]: event.target.value,
+    });
+    console.log('Filters updated:', {
       ...filters,
       [event.target.name]: event.target.value,
     });
@@ -202,6 +212,51 @@ const Reports = () => {
         );
 
       case '2': // Unpaid fees
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Organization</label>
+              <select
+                name="organization"
+                value={filters.organization}
+                onChange={handleFilterChange}
+                className="input-field mt-1"
+              >
+                <option value="">All Organizations</option>
+                {organizations.map((org) => (
+                  <option key={org.organizationId} value={org.organizationId}>
+                    {org.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Semester</label>
+              <select
+                name="semester"
+                value={filters.semester}
+                onChange={handleFilterChange}
+                className="input-field mt-1"
+              >
+                <option value="1st">First</option>
+                <option value="2nd">Second</option>
+                <option value="Midyear">Midyear</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Academic Year</label>
+              <input
+                type="text"
+                name="academicYear"
+                value={filters.academicYear}
+                onChange={handleFilterChange}
+                placeholder="e.g., 2023-2024"
+                className="input-field mt-1"
+              />
+            </div>
+          </div>
+        )
+        
       case '6': // Late payments
       case '9': // Total fees status
         return (

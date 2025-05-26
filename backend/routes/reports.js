@@ -116,33 +116,42 @@ router.get('/1', async (req, res) => {
 router.get('/2', async (req, res) => {
   try {
     const { organization, semester, academicYear } = req.query;
-    
     if (!organization || !semester || !academicYear) {
       return res.status(400).json({ 
         error: 'Organization, semester and academic year are required' 
       });
     }
 
-    const members = await Member.findAll({
+    // Find all unpaid fees for this org/semester/year, include member info
+    const fees = await Fee.findAll({
+      where: {
+        status: 'unpaid',
+        semester,
+        academicYear,
+        organizationId: organization
+      },
       include: [{
-        model: Organization,
-        where: { name: organization },
-        through: { attributes: [] }
-      }, {
-        model: Fee,
-        where: {
-          status: 'unpaid',
-          semester,
-          academicYear
-        }
-      }],
-      attributes: [
-        'studentNumber',
-        'name'
-      ]
+        model: Member,
+        attributes: ['studentNumber', 'name']
+      }]
     });
 
-    res.json(members);
+    // Group by member and sum unpaid amounts
+    const memberMap = new Map();
+    fees.forEach(fee => {
+      const { studentNumber, name } = fee.Member;
+      if (!memberMap.has(studentNumber)) {
+        memberMap.set(studentNumber, {
+          studentNumber,
+          name,
+          totalUnpaid: 0,
+          organization
+        });
+      }
+      memberMap.get(studentNumber).totalUnpaid += parseFloat(fee.amount);
+    });
+
+    res.json(Array.from(memberMap.values()));
   } catch (error) {
     handleError(res, error);
   }
