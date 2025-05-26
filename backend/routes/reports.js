@@ -245,26 +245,25 @@ router.get('/4', async (req, res) => {
   }
 });
 
-// 5. View Presidents of organization
+// 5. View all Presidents (or any role) of a given organization for every academic year (reverse chronological)
 router.get('/5', async (req, res) => {
   try {
-    const { organization } = req.query;
-    
+    const { organization, role } = req.query; // defaults to president if no role is specified
     if (!organization) {
-      return res.status(400).json({ 
-        error: 'Organization is required' 
+      return res.status(400).json({
+        error: 'Organization is required'
       });
     }
 
     const members = await Member.findAll({
       include: [{
         model: Organization,
-        where: { name: organization },
+        as: 'Organizations',
+        where: { organizationId: organization },
         through: {
           model: ServesIn,
-          where: {
-            role: 'President'
-          }
+          attributes: ['role', 'academicYear'],
+          where: { role }
         }
       }],
       attributes: [
@@ -272,11 +271,19 @@ router.get('/5', async (req, res) => {
         'name'
       ],
       order: [
-        [{ model: Organization, as: 'Organizations' }, { model: ServesIn, as: 'ServesIn' }, 'academicYear', 'DESC']
+        [sequelize.literal('`Organizations->ServesIn`.`Academic_year`'), 'DESC']
       ]
     });
 
-    res.json(members);
+    // Format the response to show member info, role, and academic year
+    const formatted = members.map(member => ({
+      studentNumber: member.studentNumber,
+      name: member.name,
+      role: member.Organizations[0]?.ServesIn?.role || 'Unknown',
+      academicYear: member.Organizations[0]?.ServesIn?.academicYear || 'Unknown'
+    }));
+
+    res.json(formatted);
   } catch (error) {
     handleError(res, error);
   }

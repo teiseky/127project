@@ -48,8 +48,9 @@ const Reports = () => {
         setError('Please select an organization');
         setLoading(false);
         return;
-      } else if (reportType === '2' && (!filters.organization || !filters.semester || !filters.academicYear)) {
-        setError('Please select organization, semester, and academic year for unpaid fees report');
+      }
+      if (reportType === '2' && (!filters.organization || !filters.semester || !filters.academicYear)) {
+        setError('Please select organization, semester, and academic year');
         setLoading(false);
         return;
       }
@@ -58,12 +59,13 @@ const Reports = () => {
         setLoading(false);
         return;
       }
-      if (reportType === '4' && !filters.organization) {
-        setError('Please select an organization');
+      if (reportType === '4' && (!filters.organization || !filters.academicYear)) {
+        setError('Please select an organization and academic year');
         setLoading(false);
         return;
-      } else if (reportType === '4' && !filters.academicYear) {
-        setError('Please select an academic year');
+      }
+      if (reportType === '5' && (!filters.organization || !filters.role)) {
+        setError('Please select an organization and role');
         setLoading(false);
         return;
       }
@@ -97,7 +99,7 @@ const Reports = () => {
       organization: '',
       semester: (newReportType === '2' || newReportType === '6') ? '1st' : '', // Default to 1st semester for unpaid fees report and case 6
       academicYear: '',
-      role: '',
+      role: (newReportType === '5') ? 'President' : '', // Default to President for previous roles report,
       status: '',
       gender: '',
       degreeProgram: '',
@@ -323,49 +325,87 @@ const Reports = () => {
             </div>
           </div>
         )
+      case '5': // View all previous roles
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Organization</label>
+              <select
+                name="organization"
+                value={filters.organization}
+                onChange={handleFilterChange}
+                className="input-field mt-1"
+              >
+                <option value="">All Organizations</option>
+                {organizations.map((org) => (
+                  <option key={org.organizationId} value={org.organizationId}>
+                    {org.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Role</label>
+              <select
+                name="role"
+                value={filters.role}
+                onChange={handleFilterChange}
+                className="input-field mt-1"
+              >
+                <option value="President">President</option>
+                <option value="Vice President">Vice President</option>
+                <option value="Secretary">Secretary</option>
+                <option value="Treasurer">Treasurer</option>
+                <option value="Member">Member</option>
+              </select>
+            </div>
+          </div>
+        )
       case '6': // Late payments
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Organization</label>
-            <select
-              name="organization"
-              value={filters.organization}
-              onChange={handleFilterChange}
-              className="input-field mt-1"
-            >
-              <option value="">All Organizations</option>
-              {organizations.map((org) => (
-                <option key={org.organizationId} value={org.organizationId}>
-                  {org.name}
-                </option>
-              ))}
-            </select>
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Organization</label>
+              <select
+                name="organization"
+                value={filters.organization}
+                onChange={handleFilterChange}
+                className="input-field mt-1"
+              >
+                <option value="">All Organizations</option>
+                {organizations.map((org) => (
+                  <option key={org.organizationId} value={org.organizationId}>
+                    {org.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Semester</label>
+              <select
+                name="semester"
+                value={filters.semester}
+                onChange={handleFilterChange}
+                className="input-field mt-1"
+              >
+                <option value="1st">First</option>
+                <option value="2nd">Second</option>
+                <option value="Midyear">Midyear</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Academic Year</label>
+              <input
+                type="text"
+                name="academicYear"
+                value={filters.academicYear}
+                onChange={handleFilterChange}
+                placeholder="e.g., 2023-2024"
+                className="input-field mt-1"
+              />
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Semester</label>
-            <select
-              name="semester"
-              value={filters.semester}
-              onChange={handleFilterChange}
-              className="input-field mt-1"
-            >
-              <option value="1st">First</option>
-              <option value="2nd">Second</option>
-              <option value="Midyear">Midyear</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Academic Year</label>
-            <input
-              type="text"
-              name="academicYear"
-              value={filters.academicYear}
-              onChange={handleFilterChange}
-              placeholder="e.g., 2023-2024"
-              className="input-field mt-1"
-            />
-          </div>
-        </div>
+        )
       case '9': // Total fees status
         return (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -520,7 +560,7 @@ const Reports = () => {
               <option value="2">Organization's Unpaid Fees</option>
               <option value="3">Member's Unpaid fees</option>
               <option value="4">Executive Committee Roster</option>
-              <option value="5">Fee Collection</option>
+              <option value="5">View all previous roles</option>
               <option value="6">Late Payments</option>
               <option value="7">Member Growth</option>
               <option value="8">Organization Growth</option>
