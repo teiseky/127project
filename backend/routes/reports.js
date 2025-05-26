@@ -484,13 +484,12 @@ router.get('/membership', async (req, res) => {
         through: ServesIn,
         attributes: ['name'],
       }],
-      attributes: ['id', 'studentNumber', 'firstName', 'lastName', 'email', 'status'],
+      attributes: ['studentNumber', 'name', 'status'],
     });
 
     const formattedData = members.map(member => ({
       'Student Number': member.studentNumber,
-      'Name': `${member.firstName} ${member.lastName}`,
-      'Email': member.email,
+      'Name': member.name,
       'Status': member.status,
       'Organizations': member.Organizations.map(org => org.name).join(', ')
     }));
@@ -513,7 +512,7 @@ router.get('/fees', async (req, res) => {
         },
         {
           model: Member,
-          attributes: ['studentNumber', 'firstName', 'lastName'],
+          attributes: ['studentNumber', 'name'],
         }
       ],
       attributes: ['id', 'amount', 'description', 'status', 'createdAt'],
@@ -521,7 +520,7 @@ router.get('/fees', async (req, res) => {
 
     const formattedData = fees.map(fee => ({
       'Student Number': fee.Member.studentNumber,
-      'Name': `${fee.Member.firstName} ${fee.Member.lastName}`,
+      'Name': fee.Member.name,
       'Organization': fee.Organization.name,
       'Amount': fee.amount,
       'Description': fee.description,
@@ -543,7 +542,7 @@ router.get('/organization', async (req, res) => {
       include: [{
         model: Member,
         through: ServesIn,
-        attributes: ['studentNumber', 'firstName', 'lastName', 'status'],
+        attributes: ['studentNumber', 'name', 'status'],
       }],
       attributes: ['id', 'name', 'description'],
     });
@@ -578,13 +577,12 @@ router.get('/member', async (req, res) => {
           attributes: ['amount', 'description', 'status'],
         }
       ],
-      attributes: ['id', 'studentNumber', 'firstName', 'lastName', 'email', 'status'],
+      attributes: ['studentNumber', 'name', 'status'],
     });
 
     const formattedData = members.map(member => ({
       'Student Number': member.studentNumber,
-      'Name': `${member.firstName} ${member.lastName}`,
-      'Email': member.email,
+      'Name': member.name,
       'Status': member.status,
       'Organizations': member.Organizations.map(org => org.name).join(', '),
       'Total Fees': member.Fees.reduce((sum, fee) => sum + fee.amount, 0),
