@@ -53,6 +53,11 @@ const Reports = () => {
         setLoading(false);
         return;
       }
+      if (reportType === '3' && !filters.studentNumber) {
+        setError('Please enter a student number');
+        setLoading(false);
+        return;
+      }
       if (reportType === '4' && !filters.organization) {
         setError('Please select an organization');
         setLoading(false);
@@ -90,7 +95,7 @@ const Reports = () => {
     setReportType(newReportType);
     setFilters({
       organization: '',
-      semester: newReportType === '2' || '6' ? '1st' : '', // Default to 1st semester for unpaid fees report and case 6
+      semester: (newReportType === '2' || newReportType === '6') ? '1st' : '', // Default to 1st semester for unpaid fees report and case 6
       academicYear: '',
       role: '',
       status: '',
@@ -266,6 +271,22 @@ const Reports = () => {
                 onChange={handleFilterChange}
                 placeholder="e.g., 2023-2024"
                 className="input-field mt-1"
+              />
+            </div>
+          </div>
+        )
+      case '3': // Member POV of unpaid fees
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Students</label>
+              <input
+                type="text"
+                name="studentNumber"
+                value={filters.studentNumber}
+                onChange={handleFilterChange}
+                className="input-field mt-1"
+                placeholder="Enter Student Number"
               />
             </div>
           </div>
@@ -497,7 +518,7 @@ const Reports = () => {
             >
               <option value="1">All Members</option>
               <option value="2">Unpaid Fees</option>
-              <option value="3">Organization Statistics</option>
+              <option value="3">Member's Unpaid fees</option>
               <option value="4">Executive Committee Roster</option>
               <option value="5">Fee Collection</option>
               <option value="6">Late Payments</option>

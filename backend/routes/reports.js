@@ -159,6 +159,8 @@ router.get('/2', async (req, res) => {
 
 // 3. View member's unpaid fees for all organizations
 router.get('/3', async (req, res) => {
+  console.log('Fetching unpaid fees for member...');
+  console.log('Request query:', req.query);
   try {
     const { studentNumber } = req.query;
     
@@ -186,6 +188,7 @@ router.get('/3', async (req, res) => {
       order: [['academicYear', 'ASC']]
     });
 
+    console.log('Unpaid fees found:', fees.length);
     res.json(fees);
   } catch (error) {
     handleError(res, error);
