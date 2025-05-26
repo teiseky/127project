@@ -517,7 +517,7 @@ const Reports = () => {
               className="input-field mt-1"
             >
               <option value="1">All Members</option>
-              <option value="2">Unpaid Fees</option>
+              <option value="2">Organization's Unpaid Fees</option>
               <option value="3">Member's Unpaid fees</option>
               <option value="4">Executive Committee Roster</option>
               <option value="5">Fee Collection</option>
