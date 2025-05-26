@@ -194,9 +194,12 @@ router.get('/3', async (req, res) => {
 
 // 4. View executive committee members
 router.get('/4', async (req, res) => {
+  console.log('Fetching executive committee members...');
+  console.log('Request query:', req.query);
   try {
     const { organization, academicYear } = req.query;
-    
+
+    console.log('Query parameters:', req.query);
     if (!organization || !academicYear) {
       return res.status(400).json({ 
         error: 'Organization and academic year are required' 
@@ -206,12 +209,13 @@ router.get('/4', async (req, res) => {
     const members = await Member.findAll({
       include: [{
         model: Organization,
-        where: { name: organization },
+        as: 'Organizations',
+        where: { organizationId: organization },
         through: {
           model: ServesIn,
           where: {
             committee: 'Executive',
-            academicYear
+            academicYear  
           }
         }
       }],
@@ -220,7 +224,7 @@ router.get('/4', async (req, res) => {
         'name'
       ],
       order: [
-        [{ model: Organization, as: 'Organizations' }, { model: ServesIn, as: 'ServesIn' }, 'role', 'ASC']
+        [sequelize.literal('`Organizations->ServesIn`.`role`'), 'ASC']
       ]
     });
 
@@ -639,4 +643,4 @@ router.get('/fees-with-orgs', async (req, res) => {
   }
 });
 
-module.exports = router; 
+module.exports = router;
