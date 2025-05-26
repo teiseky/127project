@@ -283,26 +283,45 @@ router.get('/5', async (req, res) => {
 router.get('/6', async (req, res) => {
   try {
     const { organization, semester, academicYear } = req.query;
-    
+
     if (!organization || !semester || !academicYear) {
-      return res.status(400).json({ 
-        error: 'Organization, semester and academic year are required' 
+      return res.status(400).json({
+        error: 'Organization, semester and academic year are required'
       });
     }
 
+    // Find all late payments for the org/semester/year, include member info and role
     const fees = await Fee.findAll({
       where: {
         isLate: true,
         semester,
         academicYear
       },
-      include: [{
-        model: Member,
-        attributes: ['studentNumber', 'name']
-      }, {
-        model: Organization,
-        where: { name: organization }
-      }],
+      include: [
+        {
+          model: Member,
+          attributes: ['studentNumber', 'name'],
+          include: [{
+            model: Organization,
+            as: 'Organizations',
+            where: { organizationId: organization },
+            through: {
+              model: ServesIn,
+              attributes: ['role'],
+              where: {
+                semester,
+                academicYear
+              }
+            }
+          }]
+        },
+        {
+          model: Organization,
+          as: 'Organization',
+          attributes: ['name'],
+          where: { organizationId: organization }
+        }
+      ],
       attributes: [
         'amount',
         'paymentDate'
@@ -310,7 +329,17 @@ router.get('/6', async (req, res) => {
       order: [['paymentDate', 'DESC']]
     });
 
-    res.json(fees);
+    // Format the response to include member info and their role
+    const formatted = fees.map(fee => ({
+      studentNumber: fee.Member?.studentNumber,
+      name: fee.Member?.name,
+      role: fee.Member?.Organizations?.[0]?.ServesIn?.role || 'Unknown',
+      amount: fee.amount,
+      paymentDate: fee.paymentDate,
+      organization: fee.Organization?.name
+    }));
+
+    res.json(formatted);
   } catch (error) {
     handleError(res, error);
   }
