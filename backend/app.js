@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 
+
 // Enable CORS for all routes
 app.use(cors());
 
@@ -14,7 +15,12 @@ const organizationRoutes = require('./routes/organizations');
 const feeRoutes = require('./routes/fees');
 const reportsRoutes = require('./routes/reports');
 
-// Use routes
+// User Dashboard Routes
+const userRoutes = require('./routes/userRoutes');
+
+app.use('/api/users', userRoutes); 
+
+// (Admin Routes
 app.use('/api/members', memberRoutes);
 app.use('/api/organizations', organizationRoutes);
 app.use('/api/fees', feeRoutes);
