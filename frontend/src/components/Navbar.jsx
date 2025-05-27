@@ -18,6 +18,16 @@ const Navbar = () => {
     return null;
   }
 
+  // Don't show navbar on user page
+  if (location.pathname === '/userPage') {
+    return null;
+  }
+
+  // Don't show navbar on error page
+  if (location.pathname === '/error') {
+    return null;
+  }
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-red-800 to-red-900 backdrop-blur-sm border-b border-red-700/30">
       <div className="max-w-7xl mx-auto px-6 py-4">
