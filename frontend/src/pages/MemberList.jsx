@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Edit2, Trash2, Plus } from 'lucide-react';
+import { Edit2, Trash2, Plus, Search } from 'lucide-react';
 import axios from 'axios';
 
 const MemberList = () => {
   const [members, setMembers] = useState([]);
+  const [filteredMembers, setFilteredMembers] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [open, setOpen] = useState(false);
   const [editingMember, setEditingMember] = useState(null);
   const [formData, setFormData] = useState({
@@ -19,10 +21,29 @@ const MemberList = () => {
     fetchMembers();
   }, []);
 
+  useEffect(() => {
+    filterMembers();
+  }, [searchQuery, members]);
+
+  const filterMembers = () => {
+    if (!searchQuery.trim()) {
+      setFilteredMembers(members);
+      return;
+    }
+
+    const query = searchQuery.toLowerCase().trim();
+    const filtered = members.filter(member => 
+      member.name.toLowerCase().includes(query) ||
+      member.studentNumber.toLowerCase().includes(query)
+    );
+    setFilteredMembers(filtered);
+  };
+
   const fetchMembers = async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/members');
       setMembers(response.data);
+      setFilteredMembers(response.data);
     } catch (error) {
       console.error('Error fetching members:', error);
     }
@@ -108,6 +129,21 @@ const MemberList = () => {
         </button>
       </div>
 
+      <div className="card p-4">
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search className="h-5 w-5 text-gray-400" />
+          </div>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by name or student number..."
+            className="input-field pl-10 w-full"
+          />
+        </div>
+      </div>
+
       <div className="card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
@@ -123,7 +159,7 @@ const MemberList = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {members.map((member) => (
+              {filteredMembers.map((member) => (
                 <tr key={member.studentNumber} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{member.studentNumber}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{member.name}</td>
