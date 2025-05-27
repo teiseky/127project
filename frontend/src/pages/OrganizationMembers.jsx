@@ -383,7 +383,7 @@ const OrganizationMembers = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-700">
-                              <div>{membership.semester} Semester</div>
+                              <div>{membership.semester}</div>
                               <div className="text-xs text-gray-500">{membership.academicYear}</div>
                             </div>
                           </td>
@@ -554,9 +554,8 @@ const OrganizationMembers = () => {
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent transition-all duration-200"
                   >
                     <option value="">Select Semester</option>
-                    <option value="1st">1st Semester</option>
-                    <option value="2nd">2nd Semester</option>
-                    <option value="Midyear">Midyear</option>
+                    <option value="1st Semester">1st Semester</option>
+                    <option value="2nd Semester">2nd Semester</option>
                   </select>
                 </div>
                 
