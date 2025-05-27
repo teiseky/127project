@@ -28,20 +28,21 @@ const AppContent = () => {
   }
 
   return (
-  <Routes>
-    {/* Student User Dashboard layout (with navbar + user sidebar) */}
-    <Route
-      path="/userPage"
-      element={
-        <ProtectedRoute role="user">
-          <div className="min-h-screen bg-gray-50">
-            <main className="p-6 mt-16">
-              <UserPage />
-            </main>
-          </div>
-        </ProtectedRoute>
-      }
-    />
+    <Routes>
+      {/* User layout (with navbar only) */}
+      <Route
+        path="/userPage"
+        element={
+          <ProtectedRoute role="user">
+            <div className="min-h-screen bg-white">
+              <Navbar />
+              <main className="p-6 mt-16">
+                <UserPage />
+              </main>
+            </div>
+          </ProtectedRoute>
+        }
+      />
     <Route
       path="/userDashboard/:studentNumber"
       element={
@@ -75,7 +76,7 @@ const AppContent = () => {
         path="*"
         element={
           user?.role === "admin" ? (
-            <div className="flex min-h-screen bg-gray-50">
+            <div className="flex min-h-screen bg-white">
               <Navbar />
               <Sidebar />
               <main className="flex-1 p-6 mt-16 ml-64 transition-all duration-300">
