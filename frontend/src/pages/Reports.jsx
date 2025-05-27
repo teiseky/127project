@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import axios from 'axios';
+import { Filter, Search, X } from 'lucide-react';
 
 const Reports = () => {
   const [reportType, setReportType] = useState('1');
@@ -19,6 +20,8 @@ const Reports = () => {
     batch: '',
     date: format(new Date(), 'yyyy-MM-dd'),
     limit: '10',
+    studentNumber: '',
+    n: '',
   });
 
   useEffect(() => {
@@ -96,20 +99,21 @@ const Reports = () => {
     }
   };
 
-  const handleReportChange = (event) => {
-    const newReportType = event.target.value;
+  const handleReportChange = (newReportType) => {
     setReportType(newReportType);
     setFilters({
       organization: '',
-      semester: (newReportType === '2' || newReportType === '6') ? '1st Semester' : '', // Default to 1st semester for unpaid fees report and case 6
+      semester: (newReportType === '2' || newReportType === '6') ? '1st Semester' : '',
       academicYear: '',
-      role: (newReportType === '5') ? 'President' : '', // Default to President for previous roles report,
+      role: (newReportType === '5') ? 'President' : '',
       status: '',
       gender: '',
       degreeProgram: '',
       batch: '',
       date: format(new Date(), 'yyyy-MM-dd'),
       limit: '10',
+      studentNumber: '',
+      n: '',
     });
   };
 
@@ -118,44 +122,36 @@ const Reports = () => {
       ...filters,
       [event.target.name]: event.target.value,
     });
-    console.log('Filters updated:', {
-      ...filters,
-      [event.target.name]: event.target.value,
-    });
   };
 
-  // Helper function to safely render cell values
   const renderCellValue = (cell) => {
     if (cell === null || cell === undefined) {
       return '';
     }
-    
     if (typeof cell === 'object') {
-      // Handle different object types
       if (cell.name) {
-        return cell.name; // For objects with name property
+        return cell.name;
       }
       if (Array.isArray(cell)) {
-        return cell.join(', '); // For arrays
+        return cell.join(', ');
       }
-      return JSON.stringify(cell); // Fallback for other objects
+      return JSON.stringify(cell);
     }
-    
-    return String(cell); // Convert to string for safe rendering
+    return String(cell);
   };
 
   const renderFilters = () => {
     switch (reportType) {
       case '1': // View all members
         return (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Organization *</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Organization *</label>
               <select
                 name="organization"
                 value={filters.organization}
                 onChange={handleFilterChange}
-                className="input-field mt-1"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent bg-gray-50 transition-all duration-200"
                 required
               >
                 <option value="">Select Organization</option>
@@ -167,12 +163,12 @@ const Reports = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Role</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Role</label>
               <select
                 name="role"
                 value={filters.role}
                 onChange={handleFilterChange}
-                className="input-field mt-1"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent bg-gray-50 transition-all duration-200"
               >
                 <option value="">All Roles</option>
                 <option value="President">President</option>
@@ -183,12 +179,12 @@ const Reports = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Status</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Status</label>
               <select
                 name="status"
                 value={filters.status}
                 onChange={handleFilterChange}
-                className="input-field mt-1"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent bg-gray-50 transition-all duration-200"
               >
                 <option value="">All Status</option>
                 <option value="active">Active</option>
@@ -199,12 +195,12 @@ const Reports = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Gender</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Gender</label>
               <select
                 name="gender"
                 value={filters.gender}
                 onChange={handleFilterChange}
-                className="input-field mt-1"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent bg-gray-50 transition-all duration-200"
               >
                 <option value="">All Genders</option>
                 <option value="Male">Male</option>
@@ -213,39 +209,42 @@ const Reports = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Degree Program</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Degree Program</label>
               <input
                 type="text"
                 name="degreeProgram"
                 value={filters.degreeProgram}
                 onChange={handleFilterChange}
-                className="input-field mt-1"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent bg-gray-50 transition-all duration-200"
+                placeholder="e.g., Computer Science"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Batch (Year)</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Batch (Year)</label>
               <input
                 type="text"
                 name="batch"
                 value={filters.batch}
                 onChange={handleFilterChange}
                 placeholder="e.g., 2023"
-                className="input-field mt-1"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent bg-gray-50 transition-all duration-200"
               />
             </div>
           </div>
         );
 
       case '2': // Unpaid fees
+      case '6': // Late payments
+      case '10': // Member/s with highest debt
         return (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Organization</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Organization</label>
               <select
                 name="organization"
                 value={filters.organization}
                 onChange={handleFilterChange}
-                className="input-field mt-1"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent bg-gray-50 transition-all duration-200"
               >
                 <option value="">All Organizations</option>
                 {organizations.map((org) => (
@@ -256,57 +255,60 @@ const Reports = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Semester</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Semester</label>
               <select
                 name="semester"
                 value={filters.semester}
                 onChange={handleFilterChange}
-                className="input-field mt-1"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent bg-gray-50 transition-all duration-200"
               >
+                <option value="">Select Semester</option>
                 <option value="1st Semester">1st Semester</option>
                 <option value="2nd Semester">2nd Semester</option>
                 <option value="Midyear">Midyear</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Academic Year</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Academic Year</label>
               <input
                 type="text"
                 name="academicYear"
                 value={filters.academicYear}
                 onChange={handleFilterChange}
                 placeholder="e.g., 2023-2024"
-                className="input-field mt-1"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent bg-gray-50 transition-all duration-200"
               />
             </div>
           </div>
-        )
+        );
+
       case '3': // Member POV of unpaid fees
         return (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Students</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Student Number</label>
               <input
                 type="text"
                 name="studentNumber"
                 value={filters.studentNumber}
                 onChange={handleFilterChange}
-                className="input-field mt-1"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent bg-gray-50 transition-all duration-200"
                 placeholder="Enter Student Number"
               />
             </div>
           </div>
-        )
+        );
+
       case '4': // View exec
         return (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Organization</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Organization</label>
               <select
                 name="organization"
                 value={filters.organization}
                 onChange={handleFilterChange}
-                className="input-field mt-1"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent bg-gray-50 transition-all duration-200"
               >
                 <option value="">All Organizations</option>
                 {organizations.map((org) => (
@@ -317,28 +319,29 @@ const Reports = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Academic Year</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Academic Year</label>
               <input
                 type="text"
                 name="academicYear"
                 value={filters.academicYear}
                 onChange={handleFilterChange}
                 placeholder="e.g., 2023-2024"
-                className="input-field mt-1"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent bg-gray-50 transition-all duration-200"
               />
             </div>
           </div>
-        )
+        );
+
       case '5': // View all previous roles
         return (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Organization</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Organization</label>
               <select
                 name="organization"
                 value={filters.organization}
                 onChange={handleFilterChange}
-                className="input-field mt-1"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent bg-gray-50 transition-all duration-200"
               >
                 <option value="">All Organizations</option>
                 {organizations.map((org) => (
@@ -349,12 +352,12 @@ const Reports = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Role</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Role</label>
               <select
                 name="role"
                 value={filters.role}
                 onChange={handleFilterChange}
-                className="input-field mt-1"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent bg-gray-50 transition-all duration-200"
               >
                 <option value="President">President</option>
                 <option value="Vice President">Vice President</option>
@@ -364,17 +367,18 @@ const Reports = () => {
               </select>
             </div>
           </div>
-        )
-      case '6': // Late payments
+        );
+
+      case '7': // Percentage of active vs inactive members
         return (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Organization</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Organization</label>
               <select
                 name="organization"
                 value={filters.organization}
                 onChange={handleFilterChange}
-                className="input-field mt-1"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent bg-gray-50 transition-all duration-200"
               >
                 <option value="">All Organizations</option>
                 {organizations.map((org) => (
@@ -385,105 +389,30 @@ const Reports = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Semester</label>
-              <select
-                name="semester"
-                value={filters.semester}
-                onChange={handleFilterChange}
-                className="input-field mt-1"
-              >
-                <option value="1st Semester">1st Semester</option>
-                <option value="2nd Semester">2nd Semester</option>
-                <option value="Midyear">Midyear</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Academic Year</label>
-              <input
-                type="text"
-                name="academicYear"
-                value={filters.academicYear}
-                onChange={handleFilterChange}
-                placeholder="e.g., 2023-2024"
-                className="input-field mt-1"
-              />
-            </div>
-          </div>
-        )
-      case '7': // percentage of active vs inactive members
-        return(
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Organization</label>
-              <select
-                name="organization"
-                value={filters.organization}
-                onChange={handleFilterChange}
-                className="input-field mt-1"
-              >
-                <option value="">All Organizations</option>
-                {organizations.map((org) => (
-                  <option key={org.organizationId} value={org.organizationId}>
-                      {org.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Semesters</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Semesters</label>
               <input
                 type="text"
                 name="n"
-                value={filters.n || ''}
+                value={filters.n}
                 onChange={handleFilterChange}
-                className="input-field mt-1"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent bg-gray-50 transition-all duration-200"
                 placeholder="Enter the last n semesters"
               />
             </div>
           </div>
-        )
-      case '8': // view all alumni members as of given date
-        return(
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Organization</label>
-              <select
-                name="organization"
-                value={filters.organization}
-                onChange={handleFilterChange}
-                className="input-field mt-1"
-              >
-                <option value="">All Organizations</option>
-                {organizations.map((org) => (
-                  <option key={org.organizationId} value={org.organizationId}>
-                      {org.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Date</label>
-              <input
-                type="date"
-                name="date"
-                value={filters.date || ''}
-                onChange={handleFilterChange}
-                className="input-field mt-1"
-                placeholder="Enter the date (e.g. 2025-05-25)"
-              />
-            </div>
-          </div>
-        )
+        );
+
+      case '8': // View all alumni members as of given date
       case '9': // Total fees status
         return (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Organization</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Organization</label>
               <select
                 name="organization"
                 value={filters.organization}
                 onChange={handleFilterChange}
-                className="input-field mt-1"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent bg-gray-50 transition-all duration-200"
               >
                 <option value="">All Organizations</option>
                 {organizations.map((org) => (
@@ -494,63 +423,19 @@ const Reports = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Date</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Date</label>
               <input
                 type="date"
                 name="date"
-                value={filters.date || ''}
+                value={filters.date}
                 onChange={handleFilterChange}
-                className="input-field mt-1"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent bg-gray-50 transition-all duration-200"
                 placeholder="Enter the date (e.g. 2025-05-25)"
-              />
-            </div>
-          </div>
-        )
-      case '10': // member/s with the highest debt 
-        return (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Organization</label>
-              <select
-                name="organization"
-                value={filters.organization}
-                onChange={handleFilterChange}
-                className="input-field mt-1"
-              >
-                <option value="">All Organizations</option>
-                {organizations.map((org) => (
-                  <option key={org.organizationId} value={org.organizationId}>
-                    {org.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Semester</label>
-              <select
-                name="semester"
-                value={filters.semester}
-                onChange={handleFilterChange}
-                className="input-field mt-1"
-              >
-                <option value="1st Semester">1st Semester</option>
-                <option value="2nd Semester">2nd Semester</option>
-                <option value="Midyear">Midyear</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Academic Year</label>
-              <input
-                type="text"
-                name="academicYear"
-                value={filters.academicYear}
-                onChange={handleFilterChange}
-                placeholder="e.g., 2023-2024"
-                className="input-field mt-1"
               />
             </div>
           </div>
         );
+
       default:
         return null;
     }
@@ -560,22 +445,20 @@ const Reports = () => {
     if (loading) {
       return (
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-up-maroon"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-800"></div>
         </div>
       );
     }
 
     if (error) {
       return (
-        <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
+        <div className="bg-red-50 border-l-4 border-red-800 p-4 mb-4 rounded-lg">
           <div className="flex">
             <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
+              <X className="h-5 w-5 text-red-800" />
             </div>
             <div className="ml-3">
-              <p className="text-sm text-red-700">{error}</p>
+              <p className="text-sm font-semibold text-red-800">{error}</p>
             </div>
           </div>
         </div>
@@ -585,33 +468,35 @@ const Reports = () => {
     if (!reportData.length) {
       return (
         <div className="text-center py-12">
-          <p className="text-gray-500">No data available for the selected filters.</p>
+          <Filter className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+          <p className="text-lg font-medium text-gray-900">No data found</p>
+          <p className="text-sm text-gray-500">Try adjusting your filters to view report data</p>
         </div>
       );
     }
 
     return (
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
+        <table className="min-w-full divide-y divide-gray-100">
           <thead className="bg-gray-50">
             <tr>
               {Object.keys(reportData[0]).map((header) => (
                 <th
                   key={header}
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider"
                 >
                   {header.replace(/([A-Z])/g, ' $1').trim()}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white divide-y divide-gray-100">
             {reportData.map((row, index) => (
-              <tr key={index} className="hover:bg-gray-50">
+              <tr key={index} className={`hover:bg-red-50 transition-colors duration-150 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
                 {Object.values(row).map((cell, cellIndex) => (
                   <td
                     key={cellIndex}
-                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-700"
                   >
                     {renderCellValue(cell)}
                   </td>
@@ -624,43 +509,76 @@ const Reports = () => {
     );
   };
 
+  const reportTypes = [
+    { id: '1', name: 'All Members', description: 'View all members of an organization with filtering options' },
+    { id: '2', name: 'Organization\'s Unpaid Fees', description: 'List of unpaid fees for an organization' },
+    { id: '3', name: 'Member\'s Unpaid Fees', description: 'Unpaid fees for a specific member' },
+    { id: '4', name: 'Executive Committee Roster', description: 'Current executive committee members' },
+    { id: '5', name: 'Previous Roles', description: 'Historical roles within an organization' },
+    { id: '6', name: 'Late Payments', description: 'Fees paid after due dates' },
+    { id: '7', name: 'Member Growth', description: 'Active vs inactive member percentages' },
+    { id: '8', name: 'Alumni Members', description: 'List of alumni members as of a date' },
+    { id: '9', name: 'Total Fees Status', description: 'Summary of fee payments status' },
+    { id: '10', name: 'Highest Debt Members', description: 'Members with the highest outstanding fees' },
+  ];
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900">Reports</h1>
-      </div>
-
-      <div className="card">
-        <div className="p-6 space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Report Type</label>
-            <select
-              value={reportType}
-              onChange={handleReportChange}
-              className="input-field mt-1"
-            >
-              <option value="1">All Members</option>
-              <option value="2">Organization's Unpaid Fees</option>
-              <option value="3">Member's Unpaid fees</option>
-              <option value="4">Executive Committee Roster</option>
-              <option value="5">View all previous roles</option>
-              <option value="6">Late Payments</option>
-              <option value="7">Member Growth</option>
-              <option value="8">Alumni Members</option>
-              <option value="9">Total Fees Status</option>
-              <option value="10">Member/s with Highest Debt</option>
-            </select>
+    <div className="min-h-screen bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between bg-white rounded-2xl shadow-lg p-6 border-l-8 border-red-800">
+            <div className="flex items-center space-x-4">
+              <div className="bg-gradient-to-br from-red-800 to-red-900 p-3 rounded-xl">
+                <Filter className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Reports</h1>
+                <p className="text-gray-600 mt-1">University of 127 Reports Dashboard</p>
+              </div>
+            </div>
           </div>
+        </div>
 
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900">Filters</h3>
+        {/* Report Type Selection */}
+        <div className="mb-6">
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Select Report Type</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {reportTypes.map((report) => (
+                <button
+                  key={report.id}
+                  onClick={() => handleReportChange(report.id)}
+                  className={`p-4 rounded-lg border transition-all duration-200 text-left ${
+                    reportType === report.id
+                      ? 'border-red-800 bg-red-50'
+                      : 'border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  <h3 className="text-sm font-semibold text-gray-900">{report.name}</h3>
+                  <p className="text-xs text-gray-600 mt-1">{report.description}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Filter and Search Section */}
+        <div className="mb-6">
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Filters</h2>
             {renderFilters()}
           </div>
+        </div>
 
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900">Results</h3>
-            {renderReportTable()}
+        {/* Report Table */}
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+          <div className="bg-gradient-to-r from-red-800 to-red-900 px-6 py-4">
+            <h2 className="text-xl font-semibold text-white">
+              Report Results ({reportData.length} {reportData.length === 1 ? 'record' : 'records'})
+            </h2>
           </div>
+          {renderReportTable()}
         </div>
       </div>
     </div>
