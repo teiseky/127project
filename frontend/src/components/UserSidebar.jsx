@@ -1,18 +1,18 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import {
-  UserRoundPen,
-  PhilippinePeso,
-} from 'lucide-react';
-
-const menuItems = [
-  { text: 'Dashboard', icon: <UserRoundPen className="w-5 h-5" />, path: '/userDashboard' },
-  { text: 'My Fees', icon: <PhilippinePeso className="w-5 h-5" />, path: '/userDashboard' },
-];
+import { UserRoundPen, PhilippinePeso } from 'lucide-react';
 
 const UserSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Get student number from localStorage 
+  const studentNumber = localStorage.getItem('studentNumber');
+
+  const menuItems = [
+    { text: 'Dashboard', icon: <UserRoundPen className="w-5 h-5" />, path: `/userDashboard/${studentNumber}` },
+    { text: 'My Fees', icon: <PhilippinePeso className="w-5 h-5" />, path: `/userFees/${studentNumber}` }
+  ];
 
   return (
     <aside className="fixed top-16 left-0 h-[calc(100vh-4rem)] w-60 bg-white shadow-md hidden sm:block">
@@ -21,7 +21,14 @@ const UserSidebar = () => {
           {menuItems.map((item) => (
             <li key={item.text}>
               <button
-                onClick={() => navigate(item.path)}
+                onClick={() => {
+                  if (studentNumber) {
+                    navigate(item.path);
+                  } else {
+                    alert('Student number not found. Please enter your student number.');
+                    navigate('/userPage');
+                  }
+                }}
                 className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
                   location.pathname === item.path
                     ? 'bg-up-maroon text-white'
@@ -39,4 +46,4 @@ const UserSidebar = () => {
   );
 };
 
-export default UserSidebar; 
+export default UserSidebar;
