@@ -9,14 +9,15 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  GraduationCap
+  GraduationCap,
+  PhilippinePeso
 } from 'lucide-react';
 
 const menuItems = [
   { text: 'Students', icon: <Users className="w-5 h-5" />, path: '/members' },
   { text: 'Organization List', icon: <Building2 className="w-5 h-5" />, path: '/organizations' },
   { text: 'Manage Organizations', icon: <Settings className="w-5 h-5" />, path: '/organization-members' },
-  { text: 'Fees', icon: <DollarSign className="w-5 h-5" />, path: '/fees' },
+  { text: 'Fees', icon: <PhilippinePeso className="w-5 h-5" />, path: '/fees' },
   { text: 'Reports', icon: <FileBarChart className="w-5 h-5" />, path: '/reports' },
 ];
 

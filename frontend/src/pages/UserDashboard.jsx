@@ -114,7 +114,7 @@ const UserDashboard = () => {
 
       {/* Organizations */}
       <div className="w-full bg-up-maroon-light shadow rounded-2xl p-5 border border-gray-200">
-        <h2 className="text-lg font-semibold mb-4 text-white">Organizations</h2>
+        <h2 className="text-lg font-semibold mb-4 text-white"> My Organizations</h2>
         {memberData.Organizations?.length > 0 ? (
           <ul className="space-y-3">
             {memberData.Organizations.map((org) => (

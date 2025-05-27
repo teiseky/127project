@@ -3,11 +3,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
  
 import {
   UserCircle,
-  DollarSign,
-  Settings,
   ChevronLeft,
   ChevronRight,
-  GraduationCap
+  GraduationCap,
+  PhilippinePeso
 } from 'lucide-react';
 
 const UserSidebar = () => {
@@ -20,7 +19,7 @@ const UserSidebar = () => {
 
   const menuItems = [
     { text: 'My Profile', icon: <UserCircle className="w-5 h-5" />, path: `/userDashboard/${studentNumber}` },
-    { text: 'My Fees', icon: <DollarSign className="w-5 h-5" />, path: `/userFees/${studentNumber}` },
+    { text: 'My Fees', icon: <PhilippinePeso className="w-5 h-5" />, path: `/userFees/${studentNumber}` },
   ];
 
   const handleNavigation = (path) => {
