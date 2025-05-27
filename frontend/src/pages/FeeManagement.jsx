@@ -419,7 +419,8 @@ const FeeManagement = () => {
                       value={formData.organizationId}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent transition-all duration-200"
+                      disabled={!!editingFee}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent transition-all duration-200 disabled:bg-gray-100 disabled:text-gray-500"
                     >
                       <option value="">Select Organization</option>
                       {organizations.map((org) => (
@@ -436,23 +437,16 @@ const FeeManagement = () => {
                       value={formData.studentNumber}
                       onChange={handleChange}
                       required
-                      disabled={!formData.organizationId}
+                      disabled={!!editingFee}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent transition-all duration-200 disabled:bg-gray-100 disabled:text-gray-500"
                     >
-                      <option value="">
-                        {formData.organizationId ? 'Select Student' : 'Select Organization First'}
-                      </option>
+                      <option value="">Select Student</option>
                       {filteredMembers.map((member) => (
                         <option key={member.studentNumber} value={member.studentNumber}>
                           {member.name} ({member.studentNumber})
                         </option>
                       ))}
                     </select>
-                    {formData.organizationId && (
-                      <div className="mt-1 text-xs text-gray-500">
-                        Found {filteredMembers.length} members in this organization
-                      </div>
-                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Amount</label>

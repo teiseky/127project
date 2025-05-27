@@ -96,7 +96,24 @@ router.put('/:transactionId', async (req, res) => {
   try {
     const fee = await Fee.findByPk(req.params.transactionId);
     if (fee) {
-      await fee.update(req.body);
+      // Remove organizationId and studentNumber from the update data
+      const { organizationId, studentNumber, ...updateData } = req.body;
+      
+      // Validate status
+      if (updateData.status && !['paid', 'unpaid'].includes(updateData.status)) {
+        return res.status(400).json({ 
+          message: 'Status must be either "paid" or "unpaid"' 
+        });
+      }
+
+      // Validate payment date for paid fees
+      if (updateData.status === 'paid' && !updateData.paymentDate) {
+        return res.status(400).json({ 
+          message: 'Payment date is required for paid fees' 
+        });
+      }
+
+      await fee.update(updateData);
       res.json(fee);
     } else {
       res.status(404).json({ message: 'Fee not found' });
