@@ -506,7 +506,7 @@ router.get('/10', async (req, res) => {
         attributes: ['studentNumber', 'name']
       }, {
         model: Organization,
-        where: { name: organization }
+        where: { organizationId: organization }
       }],
       where: {
         semester,

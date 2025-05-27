@@ -506,6 +506,51 @@ const Reports = () => {
               />
             </div>
           </div>
+        )
+      case '10': // member/s with the highest debt 
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Organization</label>
+              <select
+                name="organization"
+                value={filters.organization}
+                onChange={handleFilterChange}
+                className="input-field mt-1"
+              >
+                <option value="">All Organizations</option>
+                {organizations.map((org) => (
+                  <option key={org.organizationId} value={org.organizationId}>
+                    {org.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Semester</label>
+              <select
+                name="semester"
+                value={filters.semester}
+                onChange={handleFilterChange}
+                className="input-field mt-1"
+              >
+                <option value="1st">First</option>
+                <option value="2nd">Second</option>
+                <option value="Midyear">Midyear</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Academic Year</label>
+              <input
+                type="text"
+                name="academicYear"
+                value={filters.academicYear}
+                onChange={handleFilterChange}
+                placeholder="e.g., 2023-2024"
+                className="input-field mt-1"
+              />
+            </div>
+          </div>
         );
       default:
         return null;
