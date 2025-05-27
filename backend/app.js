@@ -1,7 +1,17 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
+// ######################################### COMMENT OUT THIS BLOCK IF YOU DON'T WANT TO USE TRIGGERS ########################################
 
+const triggers =  './config/initializeTriggers.js';
+
+// Require your Sequelize models here
+const { Member, ServesIn, Fee, Organization, RoleAssignment, Sequelize } = require('./models/index');
+// Import and initialize triggers
+const initializeTriggers = require('./config/initializeTriggers');
+initializeTriggers({ Member, ServesIn, Fee, Organization, RoleAssignment, Sequelize });
+
+// ######################################### COMMENT OUT THIS BLOCK IF YOU DON'T WANT TO USE TRIGGERS ########################################
 
 // Enable CORS for all routes
 app.use(cors());
@@ -37,4 +47,4 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
-module.exports = app; 
+module.exports = app;
