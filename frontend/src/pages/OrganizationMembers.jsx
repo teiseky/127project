@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Edit2, Trash2, Plus, Search, Users, X, Building2, UserPlus } from 'lucide-react';
+import { Edit2, Trash2, Plus, Search, Users, X, Building2, UserPlus, ChevronDown } from 'lucide-react';
 import axios from 'axios';
 
 const OrganizationMembers = () => {
@@ -19,6 +19,8 @@ const OrganizationMembers = () => {
     academicYear: '',
     committee: '',
   });
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchOrganizations();
@@ -247,6 +249,16 @@ const OrganizationMembers = () => {
     }
   };
 
+  const getFilteredAvailableMembers = () => {
+    const members = getAvailableMembers();
+    if (!searchTerm.trim()) return members;
+    const query = searchTerm.toLowerCase().trim();
+    return members.filter(member => 
+      member.name.toLowerCase().includes(query) ||
+      member.studentNumber.toLowerCase().includes(query)
+    );
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -429,27 +441,72 @@ const OrganizationMembers = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="md:col-span-2">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Student</label>
-                  <select
-                    name="studentNumber"
-                    value={formData.studentNumber}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent transition-all duration-200 disabled:bg-gray-100 disabled:text-gray-500"
-                    disabled={editingMembership}
-                  >
-                    <option value="">Select Student</option>
-                    {editingMembership ? (
+                  {editingMembership ? (
+                    <select
+                      name="studentNumber"
+                      value={formData.studentNumber}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent transition-all duration-200 disabled:bg-gray-100 disabled:text-gray-500"
+                      disabled={true}
+                    >
                       <option value={editingMembership.Student_number}>
                         {editingMembership.Member} ({editingMembership.Student_number})
                       </option>
-                    ) : (
-                      getAvailableMembers().map((member) => (
-                        <option key={member.studentNumber} value={member.studentNumber}>
-                          {member.name} ({member.studentNumber})
-                        </option>
-                      ))
-                    )}
-                  </select>
+                    </select>
+                  ) : (
+                    <div className="relative">
+                      <div
+                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent bg-white cursor-pointer flex items-center justify-between"
+                      >
+                        <span className={formData.studentNumber ? 'text-gray-900' : 'text-gray-500'}>
+                          {formData.studentNumber 
+                            ? getAvailableMembers().find(m => m.studentNumber === formData.studentNumber)?.name
+                            : 'Select Student'}
+                        </span>
+                        <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${isDropdownOpen ? 'transform rotate-180' : ''}`} />
+                      </div>
+                      
+                      {isDropdownOpen && (
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                          <div className="p-2 sticky top-0 bg-white border-b border-gray-200">
+                            <div className="relative">
+                              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                              <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder="Search students..."
+                                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            </div>
+                          </div>
+                          <div className="py-1">
+                            {getFilteredAvailableMembers().length === 0 ? (
+                              <div className="px-4 py-2 text-sm text-gray-500">No students found</div>
+                            ) : (
+                              getFilteredAvailableMembers().map((member) => (
+                                <div
+                                  key={member.studentNumber}
+                                  onClick={() => {
+                                    setFormData(prev => ({ ...prev, studentNumber: member.studentNumber }));
+                                    setIsDropdownOpen(false);
+                                    setSearchTerm('');
+                                  }}
+                                  className="px-4 py-2 hover:bg-red-50 cursor-pointer"
+                                >
+                                  <div className="font-medium text-gray-900">{member.name}</div>
+                                  <div className="text-sm text-gray-500">{member.studentNumber}</div>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
                 
                 <div>
