@@ -56,11 +56,7 @@ const Login = () => {
                 Management System
               </h2>
               <div className="w-20 h-0.5 bg-yellow-400 mx-auto mb-4"></div>
-              <p className="text-white/80 text-lg font-medium mb-8">
-                University of CMSC 127
-              </p>
               <div className="text-white/70 text-sm leading-relaxed">
-                <p className="mb-2">Streamline your organization management</p>
                 <p>Track members, events, and activities efficiently</p>
               </div>
             </div>
@@ -119,27 +115,6 @@ const Login = () => {
                   </div>
                 </div>
 
-                {/* Remember Me & Forgot Password */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <input
-                      id="remember-me"
-                      name="remember-me"
-                      type="checkbox"
-                      className="h-4 w-4 text-red-800 focus:ring-red-800 border-gray-300 rounded"
-                    />
-                    <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                      Remember me
-                    </label>
-                  </div>
-                  <button
-                    type="button"
-                    className="text-sm text-red-800 hover:text-red-700 font-medium"
-                  >
-                    Forgot password?
-                  </button>
-                </div>
-
                 {/* Sign In Button */}
                 <button
                   type="submit"
@@ -148,16 +123,6 @@ const Login = () => {
                   Sign In
                 </button>
               </form>
-
-              {/* Additional Links */}
-              <div className="mt-8 text-center">
-                <p className="text-gray-600 text-sm">
-                  Need help accessing your account?{' '}
-                  <button className="text-red-800 hover:text-red-700 font-semibold">
-                    Contact Administrator
-                  </button>
-                </p>
-              </div>
             </div>
           </div>
         </div>
