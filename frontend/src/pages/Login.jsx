@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { User, Lock, School } from 'lucide-react';
+import elbinexLogo from '../assets/elbinex-logo.png';
+
 
 const Login = () => {
   const navigate = useNavigate();
@@ -46,14 +48,14 @@ const Login = () => {
           <div className="bg-gradient-to-br from-red-900 to-red-800 p-12 flex flex-col justify-center items-center text-center relative">
             <div className="absolute inset-0 bg-black/10"></div>
             <div className="relative z-10 w-full">
-              <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <School className="w-12 h-12 text-white" />
+              <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <img src={elbinexLogo} alt="ElbiNex Logo" className="w-13 h-13 object-contain" />
               </div>
               <h1 className="text-3xl font-bold text-white mb-3">
-                Student Organization
+                ElbiNex
               </h1>
               <h2 className="text-2xl font-semibold text-white/90 mb-4">
-                Management System
+                Student Organization Management System
               </h2>
               <div className="w-20 h-0.5 bg-yellow-400 mx-auto mb-4"></div>
               <div className="text-white/70 text-sm leading-relaxed">
@@ -130,7 +132,7 @@ const Login = () => {
         {/* Footer */}
         <div className="text-center mt-8">
           <p className="text-gray-600 text-sm">
-            © 2025 University of CMSC 127. All rights reserved.
+            © 2025 ElbiNex. All rights reserved.
           </p>
         </div>
       </div>

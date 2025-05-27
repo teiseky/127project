@@ -10,7 +10,7 @@ const UserPage = () => {
 
   // Simple format validation function using regex (format must be 2020-12345)
   const isValidStudentNumber = (sn) => {
-    return /^\d{4}-\d{5}$/.test(sn.trim());
+    return /^\d{4}-\d{5,6}$/.test(sn.trim());
   };
 
   const handleContinue = async (e) => {
@@ -19,7 +19,7 @@ const UserPage = () => {
     setInputError('');
 
     if (!isValidStudentNumber(studentNumber)) {
-      setInputError('Invalid student number format. Expected format: YYYY-XXXXX');
+      setInputError('Invalid student number format. Expected format: YYYY-XXXXX or YYYY-XXXXXX');
       return;
     }
 
@@ -96,7 +96,7 @@ const UserPage = () => {
         {/* Footer */}
         <div className="text-center mt-8">
           <p className="text-gray-600 text-sm">
-            © 2025 University of CMSC 127. All rights reserved.
+            © 2025 EibiNex. All rights reserved.
           </p>
         </div>
       </div>

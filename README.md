@@ -1,6 +1,9 @@
-# University of CMSC 127 - Student Organization Management System
+# ElbiNex: A Student Organization Management System
 
-A full-stack application for managing organization memberships, fees, and generating reports. Built with React, Node.js, and MariaDB.
+**Welcome to ElbiNex!**  
+The name combines “Elbi” (short for Los Baños) and “Nexus” (meaning connection or series of connections linking two things), reflecting its purpose as a centralized system for student organizations.
+
+ElbiNex is a full-stack application for managing organization memberships, fees, and generating reports. Built with React, Node.js, and MariaDB.
 
 ## Features
 
