@@ -2,12 +2,14 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
-import Login from './pages/Login';
+import UserSidebar from './components/UserSidebar';
+import Login from './pages/Login'; 
 import MemberList from './pages/MemberList';
 import OrganizationList from './pages/OrganizationList';
 import FeeManagement from './pages/FeeManagement';
 import Reports from './pages/Reports';
-import UserPage from './pages/UserPage';
+import UserPage from './pages/UserPage';         
+import UserDashboard from './pages/UserDashboard'; 
 import OrganizationMembers from './pages/OrganizationMembers';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -26,15 +28,28 @@ const AppContent = () => {
 
   return (
     <Routes>
-      {/* User layout (with navbar only) */}
+      {/* Student User Dashboard layout (with navbar + user sidebar) */}
       <Route
         path="/userPage"
         element={
           <ProtectedRoute role="user">
             <div className="min-h-screen bg-gray-50">
-              <Navbar />
               <main className="p-6 mt-16">
                 <UserPage />
+              </main>
+            </div>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/userDashboard/:studentNumber"
+        element={
+          <ProtectedRoute role="user">
+            <div className="min-h-screen bg-gray-50">
+              <Navbar />
+              <UserSidebar />
+              <main className="p-6 mt-16">
+                <UserDashboard />
               </main>
             </div>
           </ProtectedRoute>
@@ -104,7 +119,6 @@ const AppContent = () => {
   );
 };
 
-
 const App = () => {
   return (
     <AuthProvider>
@@ -115,4 +129,4 @@ const App = () => {
   );
 };
 
-export default App; 
+export default App;
