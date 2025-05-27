@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const sequelize = require('./config/database');
 const memberRoutes = require('./routes/memberRoutes');
+const userRoutes = require('./routes/userRoutes');
 const feesRoutes = require('./routes/fees');
 const reportsRoutes = require('./routes/reports');
 
@@ -16,6 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/members', memberRoutes);
 app.use('/api/fees', feesRoutes);
 app.use('/api/reports', reportsRoutes);
+app.use('/api/users', userRoutes);
 
 // Database connection and server start
 const PORT = process.env.PORT || 5000;
