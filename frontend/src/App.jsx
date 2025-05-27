@@ -10,6 +10,7 @@ import FeeManagement from './pages/FeeManagement';
 import Reports from './pages/Reports';
 import UserPage from './pages/UserPage';         
 import UserDashboard from './pages/UserDashboard'; 
+import UserFees from './pages/UserFees';
 import OrganizationMembers from './pages/OrganizationMembers';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -27,35 +28,48 @@ const AppContent = () => {
   }
 
   return (
-    <Routes>
-      {/* Student User Dashboard layout (with navbar + user sidebar) */}
-      <Route
-        path="/userPage"
-        element={
-          <ProtectedRoute role="user">
-            <div className="min-h-screen bg-gray-50">
-              <main className="p-6 mt-16">
-                <UserPage />
-              </main>
-            </div>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/userDashboard/:studentNumber"
-        element={
-          <ProtectedRoute role="user">
-            <div className="min-h-screen bg-gray-50">
-              <Navbar />
-              <UserSidebar />
-              <main className="p-6 mt-16">
-                <UserDashboard />
-              </main>
-            </div>
-          </ProtectedRoute>
-        }
-      />
-
+  <Routes>
+    {/* Student User Dashboard layout (with navbar + user sidebar) */}
+    <Route
+      path="/userPage"
+      element={
+        <ProtectedRoute role="user">
+          <div className="min-h-screen bg-gray-50">
+            <main className="p-6 mt-16">
+              <UserPage />
+            </main>
+          </div>
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/userDashboard/:studentNumber"
+      element={
+        <ProtectedRoute role="user">
+          <div className="min-h-screen bg-gray-50">
+            <Navbar />
+            <UserSidebar />
+            <main className="p-6 mt-16">
+              <UserDashboard />
+            </main>
+          </div>
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/userFees/:studentNumber"
+      element={
+        <ProtectedRoute role="user">
+          <div className="min-h-screen bg-gray-50">
+            <Navbar />
+            <UserSidebar />
+            <main className="p-6 mt-16">
+              <UserFees/>
+            </main>
+          </div>
+        </ProtectedRoute>
+      }
+    />
       {/* Admin layout (with navbar + sidebar) */}
       <Route
         path="*"
