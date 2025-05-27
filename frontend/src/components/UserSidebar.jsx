@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
  
 import {
-  Users,
+  UserCircle,
   DollarSign,
   Settings,
   ChevronLeft,
@@ -19,7 +19,7 @@ const UserSidebar = () => {
   const studentNumber = localStorage.getItem('studentNumber');
 
   const menuItems = [
-    { text: 'My Profile', icon: <Users className="w-5 h-5" />, path: `/userDashboard/${studentNumber}` },
+    { text: 'My Profile', icon: <UserCircle className="w-5 h-5" />, path: `/userDashboard/${studentNumber}` },
     { text: 'My Fees', icon: <DollarSign className="w-5 h-5" />, path: `/userFees/${studentNumber}` },
   ];
 
@@ -28,7 +28,7 @@ const UserSidebar = () => {
   };
 
   return (
-    <aside className={`fixed top-16 left-0 h-[calc(100vh-4rem)] ${isCollapsed ? 'w-16' : 'w-64'} bg-white shadow-xl transition-all duration-300 ease-in-out z-10 border-r border-gray-200`}>
+    <aside className={`fixed top-20 left-0 h-[calc(100vh-5rem)] ${isCollapsed ? 'w-16' : 'w-64'} bg-white shadow-xl transition-all duration-300 ease-in-out z-10 border-r border-gray-200`}>
     
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
