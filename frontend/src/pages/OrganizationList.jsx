@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Edit2, Trash2, Plus, Search, Building2, X, Mail, Phone } from 'lucide-react';
+import { Edit2, Trash2, Plus, Search, Building2, X, Mail, Phone, AlertCircle, CheckCircle } from 'lucide-react';
 
 const OrganizationList = () => {
   const [organizations, setOrganizations] = useState([]);
@@ -7,6 +7,9 @@ const OrganizationList = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [open, setOpen] = useState(false);
   const [editingOrg, setEditingOrg] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [formData, setFormData] = useState({
     organizationId: '',
     name: '',
@@ -36,24 +39,41 @@ const OrganizationList = () => {
 
     const query = searchQuery.toLowerCase().trim();
     const filtered = organizations.filter(org => 
-      org.name.toLowerCase().includes(query) ||
-      org.organizationId.toLowerCase().includes(query)
+      org.name?.toLowerCase().includes(query) ||
+      org.organizationId?.toLowerCase().includes(query)
     );
     setFilteredOrganizations(filtered);
   };
 
   const fetchOrganizations = async () => {
     try {
+      setLoading(true);
+      setError('');
+      
+      console.log('Fetching organizations...');
       const response = await fetch('http://localhost:5000/api/organizations');
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
+      console.log('Fetched organizations:', data);
+      
       setOrganizations(data);
       setFilteredOrganizations(data);
     } catch (error) {
       console.error('Error fetching organizations:', error);
+      setError(`Failed to fetch organizations: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleOpen = (org = null) => {
+    setError('');
+    setSuccess('');
+    
     if (org) {
       setEditingOrg(org);
       setFormData({
@@ -81,60 +101,189 @@ const OrganizationList = () => {
   const handleClose = () => {
     setOpen(false);
     setEditingOrg(null);
+    setError('');
+    setSuccess('');
   };
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+    
+    // Clear error when user starts typing
+    if (error) {
+      setError('');
+    }
+  };
+
+  const validateForm = () => {
+    const errors = [];
+    
+    if (!formData.organizationId?.trim()) {
+      errors.push('Organization ID is required');
+    }
+    
+    if (!formData.name?.trim()) {
+      errors.push('Organization name is required');
+    }
+    
+    if (formData.contactEmail && !isValidEmail(formData.contactEmail)) {
+      errors.push('Please enter a valid email address');
+    }
+    
+    return errors;
+  };
+
+  const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate form
+    const validationErrors = validateForm();
+    if (validationErrors.length > 0) {
+      setError(validationErrors.join(', '));
+      return;
+    }
+    
+    setLoading(true);
+    setError('');
+    setSuccess('');
+    
     try {
+      // Prepare organization data - only include non-empty values
       const orgData = {
-        ...formData,
-        organizationId: formData.organizationId.trim()
+        organizationId: formData.organizationId.trim(),
+        name: formData.name.trim(),
       };
+      
+      // Add optional fields only if they have values
+      if (formData.scope?.trim()) orgData.scope = formData.scope.trim();
+      if (formData.type?.trim()) orgData.type = formData.type.trim();
+      if (formData.description?.trim()) orgData.description = formData.description.trim();
+      if (formData.address?.trim()) orgData.address = formData.address.trim();
+      if (formData.contactEmail?.trim()) orgData.contactEmail = formData.contactEmail.trim();
+      if (formData.contactPhone?.trim()) orgData.contactPhone = formData.contactPhone.trim();
+      if (formData.status) orgData.status = formData.status;
+      if (formData.foundedDate) orgData.foundedDate = formData.foundedDate;
 
+      console.log('Submitting organization data:', orgData);
+
+      let response;
       if (editingOrg) {
-        await fetch(`http://localhost:5000/api/organizations/${editingOrg.organizationId}`, {
+        console.log(`Updating organization: ${editingOrg.organizationId}`);
+        response = await fetch(`http://localhost:5000/api/organizations/${editingOrg.organizationId}`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
           body: JSON.stringify(orgData)
         });
       } else {
-        await fetch('http://localhost:5000/api/organizations', {
+        console.log('Creating new organization');
+        response = await fetch('http://localhost:5000/api/organizations', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
           body: JSON.stringify(orgData)
         });
       }
-      fetchOrganizations();
-      handleClose();
+
+      console.log('Response status:', response.status);
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error occurred' }));
+        console.error('Server error response:', errorData);
+        throw new Error(errorData.message || `Server error: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Success response:', result);
+
+      setSuccess(editingOrg ? 'Organization updated successfully!' : 'Organization created successfully!');
+      
+      // Refresh the organizations list
+      await fetchOrganizations();
+      
+      // Close modal after a brief delay to show success message
+      setTimeout(() => {
+        handleClose();
+      }, 1500);
+      
     } catch (error) {
       console.error('Error saving organization:', error);
-      alert('Error saving organization: ' + error.message);
+      setError(`Failed to save organization: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDelete = async (organizationId) => {
-    if (window.confirm('Are you sure you want to delete this organization?')) {
-      try {
-        await fetch(`http://localhost:5000/api/organizations/${organizationId}`, {
-          method: 'DELETE'
-        });
-        fetchOrganizations();
-      } catch (error) {
-        console.error('Error deleting organization:', error);
+    if (!window.confirm('Are you sure you want to delete this organization?')) {
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      console.log(`Deleting organization: ${organizationId}`);
+      
+      const response = await fetch(`http://localhost:5000/api/organizations/${organizationId}`, {
+        method: 'DELETE'
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error occurred' }));
+        throw new Error(errorData.message || `Server error: ${response.status}`);
       }
+      
+      setSuccess('Organization deleted successfully!');
+      await fetchOrganizations();
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccess(''), 3000);
+      
+    } catch (error) {
+      console.error('Error deleting organization:', error);
+      setError(`Failed to delete organization: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
   };
+
+  // Alert component for displaying messages
+  const Alert = ({ type, message, onClose }) => (
+    <div className={`flex items-center p-4 mb-4 rounded-lg border ${
+      type === 'error' ? 'bg-red-50 border-red-200 text-red-800' : 'bg-green-50 border-green-200 text-green-800'
+    }`}>
+      {type === 'error' ? <AlertCircle className="w-5 h-5 mr-2" /> : <CheckCircle className="w-5 h-5 mr-2" />}
+      <span className="flex-1">{message}</span>
+      {onClose && (
+        <button onClick={onClose} className="ml-2 text-gray-400 hover:text-gray-600">
+          <X className="w-4 h-4" />
+        </button>
+      )}
+    </div>
+  );
 
   return (
     <div className="h-screen bg-white flex flex-col">
       <div className="flex-none px-4 sm:px-6 lg:px-8 pt-6">
+        {/* Global Error/Success Messages */}
+        {error && !open && (
+          <Alert type="error" message={error} onClose={() => setError('')} />
+        )}
+        {success && !open && (
+          <Alert type="success" message={success} onClose={() => setSuccess('')} />
+        )}
+
         {/* Header Section */}
         <div className="mb-4">
           <div className="flex items-center justify-between bg-white rounded-2xl shadow-lg p-4 border-l-8 border-red-800">
@@ -149,7 +298,8 @@ const OrganizationList = () => {
             </div>
             <button
               onClick={() => handleOpen()}
-              className="bg-gradient-to-r from-red-800 to-red-900 hover:from-red-900 hover:to-red-800 text-white px-4 py-2 rounded-xl flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+              disabled={loading}
+              className="bg-gradient-to-r from-red-800 to-red-900 hover:from-red-900 hover:to-red-800 text-white px-4 py-2 rounded-xl flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Plus className="w-4 h-4" />
               <span className="font-semibold">Add Organization</span>
@@ -182,6 +332,7 @@ const OrganizationList = () => {
           <div className="bg-gradient-to-r from-red-800 to-red-900 px-4 py-3 rounded-t-2xl flex-none">
             <h2 className="text-lg font-semibold text-white">
               Organizations Directory ({filteredOrganizations.length} {filteredOrganizations.length === 1 ? 'organization' : 'organizations'})
+              {loading && <span className="ml-2 text-red-200">Loading...</span>}
             </h2>
           </div>
           
@@ -205,8 +356,12 @@ const OrganizationList = () => {
                     <tr>
                       <td colSpan="8" className="px-4 py-12 text-center text-gray-500">
                         <Building2 className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                        <p className="text-lg font-medium">No organizations found</p>
-                        <p className="text-sm">Add your first organization to get started</p>
+                        <p className="text-lg font-medium">
+                          {loading ? 'Loading organizations...' : 'No organizations found'}
+                        </p>
+                        <p className="text-sm">
+                          {loading ? 'Please wait...' : 'Add your first organization to get started'}
+                        </p>
                       </td>
                     </tr>
                   ) : (
@@ -219,12 +374,16 @@ const OrganizationList = () => {
                           <div className="text-sm font-semibold text-gray-900">{org.name}</div>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            {org.scope}
-                          </span>
+                          {org.scope ? (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              {org.scope}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400 italic text-xs">Not specified</span>
+                          )}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <div className="text-sm text-gray-700">{org.type}</div>
+                          <div className="text-sm text-gray-700">{org.type || <span className="text-gray-400 italic">Not specified</span>}</div>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -261,14 +420,16 @@ const OrganizationList = () => {
                           <div className="flex space-x-1">
                             <button
                               onClick={() => handleOpen(org)}
-                              className="p-2 text-amber-600 hover:text-amber-800 hover:bg-amber-50 rounded-lg transition-all duration-150"
+                              disabled={loading}
+                              className="p-2 text-amber-600 hover:text-amber-800 hover:bg-amber-50 rounded-lg transition-all duration-150 disabled:opacity-50"
                               title="Edit organization"
                             >
                               <Edit2 className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => handleDelete(org.organizationId)}
-                              className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-150"
+                              disabled={loading}
+                              className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-150 disabled:opacity-50"
                               title="Delete organization"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -295,22 +456,33 @@ const OrganizationList = () => {
               </h3>
               <button
                 onClick={handleClose}
-                className="text-white hover:text-gray-200 p-1 rounded-lg hover:bg-red-700 transition-colors duration-150"
+                disabled={loading}
+                className="text-white hover:text-gray-200 p-1 rounded-lg hover:bg-red-700 transition-colors duration-150 disabled:opacity-50"
               >
                 <X className="w-6 h-6" />
               </button>
             </div>
             
-            <div onSubmit={handleSubmit} className="p-6 space-y-6">
+            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+              {/* Error/Success Messages in Modal */}
+              {error && (
+                <Alert type="error" message={error} />
+              )}
+              {success && (
+                <Alert type="success" message={success} />
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Organization ID</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Organization ID <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="text"
                     name="organizationId"
                     value={formData.organizationId}
                     onChange={handleChange}
-                    disabled={!!editingOrg}
+                    disabled={!!editingOrg || loading}
                     required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent transition-all duration-200 disabled:bg-gray-100 disabled:text-gray-500"
                     placeholder="e.g., ORG-001"
@@ -318,12 +490,15 @@ const OrganizationList = () => {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Organization Name</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Organization Name <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
+                    disabled={loading}
                     required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent transition-all duration-200"
                     placeholder="Enter organization name"
@@ -336,10 +511,10 @@ const OrganizationList = () => {
                     name="scope"
                     value={formData.scope}
                     onChange={handleChange}
-                    required
+                    disabled={loading}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent transition-all duration-200"
                   >
-                    <option value="">Select Scope</option>
+                    <option value="">Select Scope (Optional)</option>
                     <option value="University">University</option>
                     <option value="College">College</option>
                     <option value="Department">Department</option>
@@ -353,7 +528,7 @@ const OrganizationList = () => {
                     name="type"
                     value={formData.type}
                     onChange={handleChange}
-                    required
+                    disabled={loading}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent transition-all duration-200"
                     placeholder="e.g., Academic, Non-Academic, Cultural, Sports"
                   />
@@ -366,6 +541,7 @@ const OrganizationList = () => {
                     name="contactEmail"
                     value={formData.contactEmail}
                     onChange={handleChange}
+                    disabled={loading}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent transition-all duration-200"
                     placeholder="Enter contact email"
                   />
@@ -378,6 +554,7 @@ const OrganizationList = () => {
                     name="contactPhone"
                     value={formData.contactPhone}
                     onChange={handleChange}
+                    disabled={loading}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent transition-all duration-200"
                     placeholder="Enter contact phone"
                   />
@@ -389,11 +566,15 @@ const OrganizationList = () => {
                     name="status"
                     value={formData.status}
                     onChange={handleChange}
+                    disabled={loading}
                     required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent transition-all duration-200"
                   >
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
+                    <option value="alumni">Alumni</option>
+                    <option value="expelled">Expelled</option>
+                    <option value="suspended">Suspended</option>
                   </select>
                 </div>
                 
@@ -404,6 +585,7 @@ const OrganizationList = () => {
                     name="foundedDate"
                     value={formData.foundedDate}
                     onChange={handleChange}
+                    disabled={loading}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent transition-all duration-200"
                   />
                 </div>
@@ -416,6 +598,7 @@ const OrganizationList = () => {
                   name="address"
                   value={formData.address}
                   onChange={handleChange}
+                  disabled={loading}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent transition-all duration-200"
                   placeholder="Enter organization address"
                 />
@@ -427,6 +610,7 @@ const OrganizationList = () => {
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
+                  disabled={loading}
                   rows={3}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent transition-all duration-200"
                   placeholder="Enter organization description"
@@ -437,19 +621,27 @@ const OrganizationList = () => {
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="px-6 py-3 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all duration-200"
+                  disabled={loading}
+                  className="px-6 py-3 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all duration-200 disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
-                  type="button"
-                  onClick={handleSubmit}
-                  className="px-6 py-3 bg-gradient-to-r from-red-800 to-red-900 hover:from-red-900 hover:to-red-800 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+                  type="submit"
+                  disabled={loading}
+                  className="px-6 py-3 bg-gradient-to-r from-red-800 to-red-900 hover:from-red-900 hover:to-red-800 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {editingOrg ? 'Update Organization' : 'Add Organization'}
+                  {loading ? (
+                    <>
+                      <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      {editingOrg ? 'Updating...' : 'Adding...'}
+                    </>
+                  ) : (
+                    editingOrg ? 'Update Organization' : 'Add Organization'
+                  )}
                 </button>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       )}
