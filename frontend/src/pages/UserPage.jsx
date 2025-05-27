@@ -10,7 +10,7 @@ const UserPage = () => {
 
   // Simple format validation function using regex (format must be 2020-12345)
   const isValidStudentNumber = (sn) => {
-    return /^\d{4}-\d{5}$/.test(sn.trim());
+    return /^\d{4}-\d{5,6}$/.test(sn.trim());
   };
 
   const handleContinue = async (e) => {
@@ -19,7 +19,7 @@ const UserPage = () => {
     setInputError('');
 
     if (!isValidStudentNumber(studentNumber)) {
-      setInputError('Invalid student number format. Expected format: YYYY-XXXXX');
+      setInputError('Invalid student number format. Expected format: YYYY-XXXXX or YYYY-XXXXXX');
       return;
     }
 
