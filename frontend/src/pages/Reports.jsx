@@ -74,6 +74,11 @@ const Reports = () => {
         setLoading(false);
         return;
       }
+      if (reportType === '7' && (!filters.organization || !filters.n)) {
+        setError('Please select organization and enter the last n semesters');
+        setLoading(false);
+        return;
+      }
 
       const response = await axios.get(`http://localhost:5000/api/reports/${reportType}`, {
         params: filters
@@ -438,6 +443,38 @@ const Reports = () => {
             </div>
           </div>
         )
+      case '8': // view all alumni members as of given date
+        return(
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Organization</label>
+              <select
+                name="organization"
+                value={filters.organization}
+                onChange={handleFilterChange}
+                className="input-field mt-1"
+              >
+                <option value="">All Organizations</option>
+                {organizations.map((org) => (
+                  <option key={org.organizationId} value={org.organizationId}>
+                      {org.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Date</label>
+              <input
+                type="text"
+                name="date"
+                value={filters.date || ''}
+                onChange={handleFilterChange}
+                className="input-field mt-1"
+                placeholder="Enter the date (e.g. 2025-05-25)"
+              />
+            </div>
+          </div>
+        )
       case '9': // Total fees status
         return (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -595,8 +632,9 @@ const Reports = () => {
               <option value="5">View all previous roles</option>
               <option value="6">Late Payments</option>
               <option value="7">Member Growth</option>
-              <option value="8">Organization Growth</option>
+              <option value="8">Alumni Members</option>
               <option value="9">Total Fees Status</option>
+              <option value="10">Member/s with Highest Debt</option>
             </select>
           </div>
 

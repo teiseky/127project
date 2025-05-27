@@ -418,6 +418,7 @@ router.get('/7', async (req, res) => {
 router.get('/8', async (req, res) => {
   try {
     const { organization, date } = req.query;
+    console.log('Query:', req.query);
     
     if (!organization || !date) {
       return res.status(400).json({ 
@@ -426,28 +427,26 @@ router.get('/8', async (req, res) => {
     }
 
     const members = await Member.findAll({
-      include: [{
-        model: Organization,
-        where: { name: organization },
-        through: {
-          model: ServesIn,
-          where: {
-            status: 'alumni'
-          }
+    include: [{
+      model: Organization,
+      as: 'Organizations',  // use alias
+      where: { organizationId: organization },
+      through: {
+        model: ServesIn,
+        where: {
+          status: 'alumni'
         }
-      }],
-      where: {
-        dateGraduated: {
-          [Op.lte]: date
-        }
-      },
-      attributes: [
-        'studentNumber',
-        'name',
-        'degreeProgram'
-      ],
-      order: [['dateGraduated', 'ASC']]
+      }
+    }],
+    where: {
+      dateGraduated: {
+        [Op.lte]: date
+      }
+    },
+    attributes: ['studentNumber', 'name', 'degreeProgram'],
+    order: [['dateGraduated', 'ASC']]
     });
+
 
     res.json(members);
   } catch (error) {
