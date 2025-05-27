@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Edit2, Trash2, Plus } from 'lucide-react';
+import { Edit2, Trash2, Plus, Search } from 'lucide-react';
 import axios from 'axios';
 
 const OrganizationList = () => {
   const [organizations, setOrganizations] = useState([]);
+  const [filteredOrganizations, setFilteredOrganizations] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [open, setOpen] = useState(false);
   const [editingOrg, setEditingOrg] = useState(null);
   const [formData, setFormData] = useState({
@@ -23,10 +25,29 @@ const OrganizationList = () => {
     fetchOrganizations();
   }, []);
 
+  useEffect(() => {
+    filterOrganizations();
+  }, [searchQuery, organizations]);
+
+  const filterOrganizations = () => {
+    if (!searchQuery.trim()) {
+      setFilteredOrganizations(organizations);
+      return;
+    }
+
+    const query = searchQuery.toLowerCase().trim();
+    const filtered = organizations.filter(org => 
+      org.name.toLowerCase().includes(query) ||
+      org.organizationId.toLowerCase().includes(query)
+    );
+    setFilteredOrganizations(filtered);
+  };
+
   const fetchOrganizations = async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/organizations');
       setOrganizations(response.data);
+      setFilteredOrganizations(response.data);
     } catch (error) {
       console.error('Error fetching organizations:', error);
     }
@@ -114,6 +135,22 @@ const OrganizationList = () => {
         </button>
       </div>
 
+      {/* Search Bar */}
+      <div className="card p-4">
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search className="h-5 w-5 text-gray-400" />
+          </div>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by name or organization code..."
+            className="input-field pl-10 w-full"
+          />
+        </div>
+      </div>
+
       <div className="card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
@@ -131,7 +168,7 @@ const OrganizationList = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {organizations.map((org) => (
+              {filteredOrganizations.map((org) => (
                 <tr key={org.organizationId} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{org.organizationId}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{org.name}</td>
