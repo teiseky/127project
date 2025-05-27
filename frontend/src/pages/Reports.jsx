@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import axios from 'axios';
-import { Download, RefreshCw } from 'lucide-react';
 
 const Reports = () => {
   const [reportType, setReportType] = useState('1');
@@ -629,22 +628,6 @@ const Reports = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-gray-900">Reports</h1>
-        <div className="flex space-x-4">
-          <button
-            onClick={fetchReport}
-            className="btn-secondary flex items-center space-x-2"
-          >
-            <RefreshCw className="w-5 h-5" />
-            <span>Refresh</span>
-          </button>
-          <button
-            onClick={() => window.print()}
-            className="btn-primary flex items-center space-x-2"
-          >
-            <Download className="w-5 h-5" />
-            <span>Download</span>
-          </button>
-        </div>
       </div>
 
       <div className="card">
