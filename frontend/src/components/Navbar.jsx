@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LogOut, GraduationCap } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import elbinexLogo from '../assets/elbinex-logo.png';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -34,8 +35,8 @@ const Navbar = () => {
         <div className="flex items-center justify-between">
           {/* Left side - Logo and Title */}
           <div className="flex items-center space-x-4">
-            <div className="flex items-center justify-center w-12 h-12 bg-white/10 rounded-xl backdrop-blur-sm border border-white/20">
-              <GraduationCap className="w-7 h-7 text-yellow-300" />
+            <div className="flex items-center justify-center w-12 h-12 bg-white/20 rounded-xl backdrop-blur-sm border border-white/20">
+              <img src={elbinexLogo} alt="ElbiNex Logo" className="w-8 h-8 object-contain" />
             </div>
             <div className="flex flex-col">
               <h1 className="text-xl font-bold text-white tracking-tight">

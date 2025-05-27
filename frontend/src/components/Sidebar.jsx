@@ -96,7 +96,7 @@ const Sidebar = () => {
         <div className="absolute bottom-4 left-4 right-4">
           <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
             <div className="text-xs text-gray-600 text-center">
-              University of CMSC 127
+              © 2025 ElbiNex
             </div>
             <div className="text-xs text-red-800 text-center font-semibold">
               Student Management System
