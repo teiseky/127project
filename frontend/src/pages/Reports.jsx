@@ -465,7 +465,7 @@ const Reports = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700">Date</label>
               <input
-                type="text"
+                type="date"
                 name="date"
                 value={filters.date || ''}
                 onChange={handleFilterChange}
@@ -495,32 +495,18 @@ const Reports = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Semester</label>
-              <select
-                name="semester"
-                value={filters.semester}
-                onChange={handleFilterChange}
-                className="input-field mt-1"
-              >
-                <option value="First">First</option>
-                <option value="Second">Second</option>
-                <option value="Midyear">Midyear</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Academic Year</label>
+              <label className="block text-sm font-medium text-gray-700">Date</label>
               <input
-                type="text"
-                name="academicYear"
-                value={filters.academicYear}
+                type="date"
+                name="date"
+                value={filters.date || ''}
                 onChange={handleFilterChange}
-                placeholder="e.g., 2023-2024"
                 className="input-field mt-1"
+                placeholder="Enter the date (e.g. 2025-05-25)"
               />
             </div>
           </div>
         );
-
       default:
         return null;
     }

@@ -469,7 +469,7 @@ router.get('/9', async (req, res) => {
     const result = await Fee.findAll({
       include: [{
         model: Organization,
-        where: { name: organization }
+        where: { organizationId: organization }
       }],
       where: {
         paymentDate: {
