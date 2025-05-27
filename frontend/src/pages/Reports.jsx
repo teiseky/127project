@@ -406,6 +406,38 @@ const Reports = () => {
             </div>
           </div>
         )
+      case '7': // percentage of active vs inactive members
+        return(
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Organization</label>
+              <select
+                name="organization"
+                value={filters.organization}
+                onChange={handleFilterChange}
+                className="input-field mt-1"
+              >
+                <option value="">All Organizations</option>
+                {organizations.map((org) => (
+                  <option key={org.organizationId} value={org.organizationId}>
+                      {org.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Semesters</label>
+              <input
+                type="text"
+                name="n"
+                value={filters.n || ''}
+                onChange={handleFilterChange}
+                className="input-field mt-1"
+                placeholder="Enter the last n semesters"
+              />
+            </div>
+          </div>
+        )
       case '9': // Total fees status
         return (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
