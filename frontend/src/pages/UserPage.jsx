@@ -5,31 +5,15 @@ import axios from 'axios'; // Add axios to call backend
 const UserPage = () => {
   const [studentNumber, setStudentNumber] = useState('');
   const [loading, setLoading] = useState(false);
-  const [inputError, setInputError] = useState('');
   const navigate = useNavigate();
-
-  // Simple format validation function using regex (format must be 2020-12345)
-  const isValidStudentNumber = (sn) => {
-    return /^\d{4}-\d{5,6}$/.test(sn.trim());
-  };
 
   const handleContinue = async (e) => {
     e.preventDefault();
-
-    setInputError('');
-
-    if (!isValidStudentNumber(studentNumber)) {
-      setInputError('Invalid student number format. Expected format: YYYY-XXXXX or YYYY-XXXXXX');
-      return;
-    }
-
     setLoading(true);
     try {
-      // check agad if the student number exists sa db
       const response = await axios.get(`http://localhost:5000/api/users/${studentNumber.trim()}`);
 
       if (response.data) {
-        // if existing, store in local storage then go to user dashboard
         localStorage.setItem('studentNumber', studentNumber.trim());
         navigate(`/userDashboard/${studentNumber.trim()}`);
       } else {
@@ -66,11 +50,10 @@ const UserPage = () => {
                     required
                     value={studentNumber}
                     onChange={(e) => setStudentNumber(e.target.value)}
-                    placeholder="e.g., 2023-00001"
+                    placeholder="e.g., 2023000001"
                     className="w-full pl-4 pr-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-red-800 transition-colors duration-200 bg-gray-50 focus:bg-white text-lg"
                     disabled={loading}
                   />
-                  {inputError && <p className="text-red-600 text-sm">{inputError}</p>}
                 </div>
 
                 <button
