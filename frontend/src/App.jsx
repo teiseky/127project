@@ -7,16 +7,13 @@ import MemberList from './pages/MemberList';
 import OrganizationList from './pages/OrganizationList';
 import FeeManagement from './pages/FeeManagement';
 import Reports from './pages/Reports';
+import UserPage from './pages/UserPage';
 import OrganizationMembers from './pages/OrganizationMembers';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? children : <Navigate to="/login" />;
-};
+import { ProtectedRoute } from './components/ProtectedRoute';
 
 const AppContent = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   if (!isAuthenticated) {
     return (
@@ -28,22 +25,85 @@ const AppContent = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <Navbar />
-      <Sidebar />
-      <main className="flex-1 p-6 mt-16 ml-0 sm:ml-60 transition-all duration-300">
-        <Routes>
-          <Route path="/members" element={<MemberList />} />
-          <Route path="/organizations" element={<OrganizationList />} />
-          <Route path="/organization-members" element={<OrganizationMembers />} />
-          <Route path="/fees" element={<FeeManagement />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="*" element={<Navigate to="/members" />} />
-        </Routes>
-      </main>
-    </div>
+    <Routes>
+      {/* User layout (with navbar only) */}
+      <Route
+        path="/userPage"
+        element={
+          <ProtectedRoute role="user">
+            <div className="min-h-screen bg-gray-50">
+              <Navbar />
+              <main className="p-6 mt-16">
+                <UserPage />
+              </main>
+            </div>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Admin layout (with navbar + sidebar) */}
+      <Route
+        path="*"
+        element={
+          user?.role === "admin" ? (
+            <div className="flex min-h-screen bg-gray-50">
+              <Navbar />
+              <Sidebar />
+              <main className="flex-1 p-6 mt-16 ml-0 sm:ml-60 transition-all duration-300">
+                <Routes>
+                  <Route
+                    path="/members"
+                    element={
+                      <ProtectedRoute role="admin">
+                        <MemberList />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/organizations"
+                    element={
+                      <ProtectedRoute role="admin">
+                        <OrganizationList />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/organization-members"
+                    element={
+                      <ProtectedRoute role="admin">
+                        <OrganizationMembers />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/fees"
+                    element={
+                      <ProtectedRoute role="admin">
+                        <FeeManagement />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/reports"
+                    element={
+                      <ProtectedRoute role="admin">
+                        <Reports />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route path="*" element={<Navigate to="/members" />} />
+                </Routes>
+              </main>
+            </div>
+          ) : (
+            <Navigate to="/userPage" />
+          )
+        }
+      />
+    </Routes>
   );
 };
+
 
 const App = () => {
   return (

@@ -1,5 +1,7 @@
 {
   "dependencies": {
-    "recharts": "^2.15.3"
+    "bcrypt": "^6.0.0",
+    "recharts": "^2.15.3",
+    "uuid": "^11.1.0"
   }
 }

@@ -19,12 +19,23 @@ const Login = () => {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    // For demo purposes, we'll just log in with any credentials
-    login({ username: formData.username });
-    navigate('/members');
-  };
+  e.preventDefault();
 
+  // Fake "login" user with role based on username
+  let userRole = 'user';         
+  if (formData.username === 'admin') {
+    userRole = 'admin';
+  }
+
+  // Save user data including role
+  login({ username: formData.username, role: userRole });
+
+  if (userRole === 'admin') {
+    navigate('/members');  // admin page
+  } else {
+    navigate('/userPage');  // user page
+  }
+};
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
       <div className="w-full max-w-4xl">
