@@ -301,44 +301,44 @@ const seedDatabase = async () => {
     // Create member-organization relationships (each student in different orgs)
     const servesInRecords = await ServesIn.bulkCreate([
       // Organization 1 - Digital Arts Society
-      { Student_number: '2021-54321', Organization_id: 'ORG001', Role: 'President', Status: 'active', Semester: 'First', Academic_year: '2024-2025', Committee: 'Executive Board' },
-      { Student_number: '2022-65432', Organization_id: 'ORG001', Role: 'Vice President', Status: 'active', Semester: 'First', Academic_year: '2024-2025', Committee: 'Creative Committee' },
+      { Student_number: '2021-54321', Organization_id: 'ORG001', Role: 'President', Status: 'active', Semester: '1st', Academic_year: '2024-2025', Committee: 'Executive Board' },
+      { Student_number: '2022-65432', Organization_id: 'ORG001', Role: 'Vice President', Status: 'active', Semester: '1st', Academic_year: '2024-2025', Committee: 'Creative Committee' },
       
       // Organization 2 - Environmental Action Network
-      { Student_number: '2020-76543', Organization_id: 'ORG002', Role: 'Secretary', Status: 'alumni', Semester: 'Second', Academic_year: '2023-2024', Committee: 'Advocacy Committee' },
-      { Student_number: '2021-87654', Organization_id: 'ORG002', Role: 'Treasurer', Status: 'active', Semester: 'First', Academic_year: '2024-2025', Committee: 'Finance Committee' },
+      { Student_number: '2020-76543', Organization_id: 'ORG002', Role: 'Secretary', Status: 'alumni', Semester: '2nd', Academic_year: '2023-2024', Committee: 'Advocacy Committee' },
+      { Student_number: '2021-87654', Organization_id: 'ORG002', Role: 'Treasurer', Status: 'active', Semester: '1st', Academic_year: '2024-2025', Committee: 'Finance Committee' },
       
       // Organization 3 - Business Innovation Hub
-      { Student_number: '2022-98765', Organization_id: 'ORG003', Role: 'Member', Status: 'active', Semester: 'First', Academic_year: '2024-2025', Committee: 'Marketing Committee' },
-      { Student_number: '2019-12345', Organization_id: 'ORG003', Role: 'Advisor', Status: 'alumni', Semester: 'Second', Academic_year: '2022-2023', Committee: 'Advisory Board' },
+      { Student_number: '2022-98765', Organization_id: 'ORG003', Role: 'Member', Status: 'active', Semester: '1st', Academic_year: '2024-2025', Committee: 'Marketing Committee' },
+      { Student_number: '2019-12345', Organization_id: 'ORG003', Role: 'Advisor', Status: 'alumni', Semester: '2nd', Academic_year: '2022-2023', Committee: 'Advisory Board' },
       
       // Organization 4 - Cultural Heritage Foundation
-      { Student_number: '2021-23456', Organization_id: 'ORG004', Role: 'Public Relations Officer', Status: 'active', Semester: 'First', Academic_year: '2024-2025', Committee: 'Communications' },
-      { Student_number: '2022-34567', Organization_id: 'ORG004', Role: 'Event Coordinator', Status: 'active', Semester: 'First', Academic_year: '2024-2025', Committee: 'Events Committee' },
+      { Student_number: '2021-23456', Organization_id: 'ORG004', Role: 'Public Relations Officer', Status: 'active', Semester: '1st', Academic_year: '2024-2025', Committee: 'Communications' },
+      { Student_number: '2022-34567', Organization_id: 'ORG004', Role: 'Event Coordinator', Status: 'active', Semester: '1st', Academic_year: '2024-2025', Committee: 'Events Committee' },
       
       // Organization 5 - Tech Innovators Club
-      { Student_number: '2020-45678', Organization_id: 'ORG005', Role: 'Project Manager', Status: 'alumni', Semester: 'First', Academic_year: '2023-2024', Committee: 'Development Team' },
-      { Student_number: '2021-56789', Organization_id: 'ORG005', Role: 'Member', Status: 'active', Semester: 'First', Academic_year: '2024-2025', Committee: 'Research Committee' },
+      { Student_number: '2020-45678', Organization_id: 'ORG005', Role: 'Project Manager', Status: 'alumni', Semester: '1st', Academic_year: '2023-2024', Committee: 'Development Team' },
+      { Student_number: '2021-56789', Organization_id: 'ORG005', Role: 'Member', Status: 'active', Semester: '1st', Academic_year: '2024-2025', Committee: 'Research Committee' },
       
       // Organization 6 - Medical Outreach Society
-      { Student_number: '2022-67890', Organization_id: 'ORG006', Role: 'Volunteer Coordinator', Status: 'active', Semester: 'First', Academic_year: '2024-2025', Committee: 'Outreach Committee' },
-      { Student_number: '2021-78901', Organization_id: 'ORG006', Role: 'Member', Status: 'inactive', Semester: 'Second', Academic_year: '2023-2024', Committee: 'Medical Team' },
+      { Student_number: '2022-67890', Organization_id: 'ORG006', Role: 'Volunteer Coordinator', Status: 'active', Semester: '1st', Academic_year: '2024-2025', Committee: 'Outreach Committee' },
+      { Student_number: '2021-78901', Organization_id: 'ORG006', Role: 'Member', Status: 'inactive', Semester: '2nd', Academic_year: '2023-2024', Committee: 'Medical Team' },
       
       // Organization 7 - Athletic Performance League
-      { Student_number: '2020-89012', Organization_id: 'ORG007', Role: 'Team Captain', Status: 'alumni', Semester: 'Second', Academic_year: '2023-2024', Committee: 'Athletics Committee' },
-      { Student_number: '2022-90123', Organization_id: 'ORG007', Role: 'Training Officer', Status: 'active', Semester: 'First', Academic_year: '2024-2025', Committee: 'Training Committee' },
+      { Student_number: '2020-89012', Organization_id: 'ORG007', Role: 'Team Captain', Status: 'alumni', Semester: '2nd', Academic_year: '2023-2024', Committee: 'Athletics Committee' },
+      { Student_number: '2022-90123', Organization_id: 'ORG007', Role: 'Training Officer', Status: 'active', Semester: '1st', Academic_year: '2024-2025', Committee: 'Training Committee' },
       
       // Organization 8 - Literary Arts Collective
-      { Student_number: '2021-01234', Organization_id: 'ORG008', Role: 'Editor-in-Chief', Status: 'suspended', Semester: 'First', Academic_year: '2024-2025', Committee: 'Editorial Board' },
-      { Student_number: '2019-11111', Organization_id: 'ORG008', Role: 'Contributing Writer', Status: 'alumni', Semester: 'Second', Academic_year: '2022-2023', Committee: 'Publications' },
+      { Student_number: '2021-01234', Organization_id: 'ORG008', Role: 'Editor-in-Chief', Status: 'suspended', Semester: '1st', Academic_year: '2024-2025', Committee: 'Editorial Board' },
+      { Student_number: '2019-11111', Organization_id: 'ORG008', Role: 'Contributing Writer', Status: 'alumni', Semester: '2nd', Academic_year: '2022-2023', Committee: 'Publications' },
       
       // Organization 9 - Social Justice Alliance
-      { Student_number: '2022-22222', Organization_id: 'ORG009', Role: 'Advocacy Officer', Status: 'active', Semester: 'First', Academic_year: '2024-2025', Committee: 'Legal Affairs' },
-      { Student_number: '2021-33333', Organization_id: 'ORG009', Role: 'Research Assistant', Status: 'active', Semester: 'First', Academic_year: '2024-2025', Committee: 'Research Committee' },
+      { Student_number: '2022-22222', Organization_id: 'ORG009', Role: 'Advocacy Officer', Status: 'active', Semester: '1st', Academic_year: '2024-2025', Committee: 'Legal Affairs' },
+      { Student_number: '2021-33333', Organization_id: 'ORG009', Role: 'Research Assistant', Status: 'active', Semester: '1st', Academic_year: '2024-2025', Committee: 'Research Committee' },
       
       // Organization 10 - Future Leaders Forum
-      { Student_number: '2020-44444', Organization_id: 'ORG010', Role: 'Mentor', Status: 'alumni', Semester: 'First', Academic_year: '2023-2024', Committee: 'Mentorship Program' },
-      { Student_number: '2022-55555', Organization_id: 'ORG010', Role: 'Program Coordinator', Status: 'active', Semester: 'First', Academic_year: '2024-2025', Committee: 'Program Development' }
+      { Student_number: '2020-44444', Organization_id: 'ORG010', Role: 'Mentor', Status: 'alumni', Semester: '1st', Academic_year: '2023-2024', Committee: 'Mentorship Program' },
+      { Student_number: '2022-55555', Organization_id: 'ORG010', Role: 'Program Coordinator', Status: 'active', Semester: '1st', Academic_year: '2024-2025', Committee: 'Program Development' }
     ]);
 
     console.log(`Created ${servesInRecords.length} member-organization relationships`);

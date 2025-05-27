@@ -102,7 +102,7 @@ const Reports = () => {
     setReportType(newReportType);
     setFilters({
       organization: '',
-      semester: (newReportType === '2' || newReportType === '6') ? '1st' : '', // Default to 1st semester for unpaid fees report and case 6
+      semester: (newReportType === '2' || newReportType === '6') ? '1st Semester' : '', // Default to 1st semester for unpaid fees report and case 6
       academicYear: '',
       role: (newReportType === '5') ? 'President' : '', // Default to President for previous roles report,
       status: '',
@@ -264,8 +264,8 @@ const Reports = () => {
                 onChange={handleFilterChange}
                 className="input-field mt-1"
               >
-                <option value="1st">First</option>
-                <option value="2nd">Second</option>
+                <option value="1st Semester">1st Semester</option>
+                <option value="2nd Semester">2nd Semester</option>
                 <option value="Midyear">Midyear</option>
               </select>
             </div>
@@ -393,8 +393,8 @@ const Reports = () => {
                 onChange={handleFilterChange}
                 className="input-field mt-1"
               >
-                <option value="1st">First</option>
-                <option value="2nd">Second</option>
+                <option value="1st Semester">1st Semester</option>
+                <option value="2nd Semester">2nd Semester</option>
                 <option value="Midyear">Midyear</option>
               </select>
             </div>
@@ -534,8 +534,8 @@ const Reports = () => {
                 onChange={handleFilterChange}
                 className="input-field mt-1"
               >
-                <option value="1st">First</option>
-                <option value="2nd">Second</option>
+                <option value="1st Semester">1st Semester</option>
+                <option value="2nd Semester">2nd Semester</option>
                 <option value="Midyear">Midyear</option>
               </select>
             </div>
