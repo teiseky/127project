@@ -1,14 +1,34 @@
-# Organization Membership Application
+# University of CMSC 127 - Student Organization Management System
 
-A full-stack application for managing organization memberships, fees, and generating reports.
+A full-stack application for managing organization memberships, fees, and generating reports. Built with React, Node.js, and MariaDB.
 
 ## Features
 
-- Member management
+- Member management and registration
 - Organization management
-- Fee tracking
-- Role management
+- Fee tracking and payment processing
+- Role-based access control
 - Comprehensive reporting system
+- Modern UI with Material-UI components
+
+## Tech Stack
+
+### Frontend
+- React 18
+- Material-UI (MUI) v5
+- React Router v6
+- Axios for API calls
+- Recharts for data visualization
+- TailwindCSS for styling
+- Date-fns for date manipulation
+
+### Backend
+- Node.js with Express
+- Sequelize ORM
+- MariaDB database
+- JWT for authentication
+- bcryptjs for password hashing
+- CORS enabled
 
 ## Prerequisites
 
@@ -24,19 +44,24 @@ git clone <repository-url>
 cd org-membership-app
 ```
 
-2. Install backend dependencies:
+2. Install root dependencies:
+```bash
+npm install
+```
+
+3. Install backend dependencies:
 ```bash
 cd backend
 npm install
 ```
 
-3. Install frontend dependencies:
+4. Install frontend dependencies:
 ```bash
 cd ../frontend
 npm install
 ```
 
-4. Database Setup:
+5. Database Setup:
    - Install MariaDB if you haven't already
    - Create a new database:
      ```sql
@@ -48,34 +73,23 @@ npm install
      GRANT ALL PRIVILEGES ON org_membership.* TO 'org_user'@'localhost';
      FLUSH PRIVILEGES;
      ```
-   - Update the database configuration in `backend/config/database.js`:
-     ```javascript
-     {
-       username: 'org_user',
-       password: 'your_password',
-       database: 'org_membership',
-       host: 'localhost',
-       dialect: 'mariadb'
-     }
+   - Create a `.env` file in the backend directory with the following content:
+     ```
+     DB_USER=org_user
+     DB_PASSWORD=your_password
+     DB_NAME=org_membership
+     DB_HOST=localhost
+     JWT_SECRET=your_jwt_secret
+     PORT=5000
      ```
 
-5. Initialize the database:
+6. Initialize the database:
 ```bash
 cd backend
-node seed.js
-```
-This will create the necessary tables and populate them with sample data.
+(OPTIONAL)node seed.js
 
-6. Git Configuration:
-   - The repository includes a `.gitignore` file that excludes:
-     - Node modules and dependencies
-     - Environment files (.env)
-     - Build outputs
-     - Log files
-     - IDE-specific files
-     - Database files
-     - System files
-   - Make sure to keep your `.env` file local and never commit it to the repository
+SOURCE <sql-setup-file>
+```
 
 ## Running the Application
 
@@ -95,8 +109,25 @@ The frontend will be available at http://localhost:3000
 
 ## API Endpoints
 
-### Reports
+### Authentication
+- POST `/api/auth/login` - User login
+- POST `/api/auth/register` - User registration
 
+### Members
+- GET `/api/members` - Get all members
+- POST `/api/members` - Create new member
+- GET `/api/members/:id` - Get member by ID
+- PUT `/api/members/:id` - Update member
+- DELETE `/api/members/:id` - Delete member
+
+### Organizations
+- GET `/api/organizations` - Get all organizations
+- POST `/api/organizations` - Create new organization
+- GET `/api/organizations/:id` - Get organization by ID
+- PUT `/api/organizations/:id` - Update organization
+- DELETE `/api/organizations/:id` - Delete organization
+
+### Reports
 1. View all members of an organization
    - GET `/api/reports/1?organization=<org_name>`
 
@@ -127,25 +158,27 @@ The frontend will be available at http://localhost:3000
 10. View highest debt members
     - GET `/api/reports/10?organization=<org_name>`
 
-## Technologies Used
+## Development
 
-- Frontend:
-  - React
-  - Material-UI
-  - Axios
-  - React Router
+### Frontend Development
+- Uses Create React App
+- Material-UI for component library
+- TailwindCSS for custom styling
+- React Router for navigation
+- Axios for API communication
 
-- Backend:
-  - Node.js
-  - Express
-  - Sequelize
-  - MariaDB
+### Backend Development
+- Express.js server
+- Sequelize for database operations
+- JWT for authentication
+- Environment variables for configuration
+- Nodemon for development
 
 ## Troubleshooting
 
 1. Database Connection Issues:
    - Ensure MariaDB service is running
-   - Verify database credentials in `backend/config/database.js`
+   - Verify database credentials in `.env` file
    - Check if the database and user exist
 
 2. Backend Issues:
@@ -158,6 +191,16 @@ The frontend will be available at http://localhost:3000
    - Check browser console for errors
    - Ensure backend server is running
 
-## License
+## Contributing
 
-MIT 
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## Authors
+
+Joshua Carlos
+Jhuliana Ledesma
+Sebastian Merdegia
