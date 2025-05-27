@@ -32,7 +32,7 @@ const Navbar = () => {
                 Student Organization Management
               </h1>
               <p className="text-sm text-yellow-200/80 font-medium">
-                University of the Philippines
+                University of CMSC 127
               </p>
             </div>
           </div>

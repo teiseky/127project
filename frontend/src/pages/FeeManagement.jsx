@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Edit2, Trash2, Plus, Filter } from 'lucide-react';
+import { Edit2, Trash2, Plus, Search, Filter, X } from 'lucide-react';
 
 const FeeManagement = () => {
   const [fees, setFees] = useState([]);
@@ -10,6 +10,7 @@ const FeeManagement = () => {
   const [open, setOpen] = useState(false);
   const [editingFee, setEditingFee] = useState(null);
   const [selectedOrg, setSelectedOrg] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [formData, setFormData] = useState({
     transactionId: '',
     studentNumber: '',
@@ -31,7 +32,7 @@ const FeeManagement = () => {
 
   useEffect(() => {
     filterFeesByOrganization();
-  }, [fees, selectedOrg]);
+  }, [fees, selectedOrg, searchQuery]);
 
   useEffect(() => {
     filterMembersByOrganization();
@@ -52,7 +53,6 @@ const FeeManagement = () => {
     try {
       const response = await fetch('http://localhost:5000/api/organizations');
       const data = await response.json();
-      console.log('Organizations fetched:', data.length);
       setOrganizations(data);
     } catch (error) {
       console.error('Error fetching organizations:', error);
@@ -64,20 +64,6 @@ const FeeManagement = () => {
     try {
       const response = await fetch('http://localhost:5000/api/members/with-orgs');
       const data = await response.json();
-      
-      console.log('=== Members API Response Debug ===');
-      console.log('Total members fetched:', data.length);
-      
-      if (data.length > 0) {
-        const sampleMember = data[0];
-        console.log('Sample member structure:', {
-          studentNumber: sampleMember.studentNumber,
-          name: sampleMember.name,
-          organizations: sampleMember.Organizations?.length || 0,
-          organizationIds: sampleMember.Organizations?.map(org => org.organizationId) || []
-        });
-      }
-      
       setMembers(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching members:', error);
@@ -87,58 +73,37 @@ const FeeManagement = () => {
   };
 
   const filterFeesByOrganization = () => {
-    if (!selectedOrg) {
-      setFilteredFees(fees);
-    } else {
-      const filtered = fees.filter(fee => fee.organizationId === selectedOrg);
-      setFilteredFees(filtered);
+    let filtered = fees;
+    if (selectedOrg) {
+      filtered = filtered.filter(fee => fee.organizationId === selectedOrg);
     }
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter(fee => 
+        getMemberName(fee.studentNumber).toLowerCase().includes(query) ||
+        fee.transactionId.toLowerCase().includes(query) ||
+        getOrganizationName(fee.organizationId).toLowerCase().includes(query)
+      );
+    }
+    setFilteredFees(filtered);
   };
 
   const filterMembersByOrganization = () => {
-    console.log('=== Member Filtering Debug ===');
-    console.log('Selected organization ID:', formData.organizationId);
-    console.log('Total members available:', members.length);
-    
     if (!formData.organizationId) {
-      console.log('No organization selected, clearing filtered members');
       setFilteredMembers([]);
       return;
     }
-
-    const filtered = members.filter(member => {
-      if (!member.Organizations || !Array.isArray(member.Organizations)) {
-        console.log(`Member ${member.name} has no organizations array`);
-        return false;
-      }
-
-      const hasOrganization = member.Organizations.some(org => {
-        const orgId = org.organizationId;
-        const match = orgId === formData.organizationId;
-        
-        if (match) {
-          console.log(`✓ Member ${member.name} belongs to organization ${orgId}`);
-        }
-        
-        return match;
-      });
-
-      return hasOrganization;
-    });
-    
-    console.log('Filtered members count:', filtered.length);
-    console.log('Filtered members:', filtered.map(m => ({ name: m.name, studentNumber: m.studentNumber })));
-    
+    const filtered = members.filter(member => 
+      member.Organizations?.some(org => org.organizationId === formData.organizationId)
+    );
     setFilteredMembers(filtered);
   };
 
-  // Helper function to get member name by student number
   const getMemberName = (studentNumber) => {
     const member = members.find(m => m.studentNumber === studentNumber);
     return member ? member.name : 'Unknown Member';
   };
 
-  // Helper function to get organization name by organization ID
   const getOrganizationName = (organizationId) => {
     const org = organizations.find(o => o.organizationId === organizationId);
     return org ? org.name : 'Unknown Organization';
@@ -189,16 +154,12 @@ const FeeManagement = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
-
-    // Clear student selection when organization changes
     if (name === 'organizationId') {
       setFormData(prev => ({
         ...prev,
         studentNumber: '',
       }));
     }
-
-    // Clear payment date and isLate when status changes to unpaid
     if (name === 'status' && value === 'unpaid') {
       setFormData(prev => ({
         ...prev,
@@ -212,13 +173,10 @@ const FeeManagement = () => {
     e.preventDefault();
     try {
       const submitData = { ...formData };
-      
-      // If status is unpaid, ensure paymentDate and isLate are cleared
       if (submitData.status === 'unpaid') {
         submitData.paymentDate = '';
         submitData.isLate = false;
       }
-
       if (editingFee) {
         const response = await fetch(`http://localhost:5000/api/fees/${editingFee.transactionId}`, {
           method: 'PUT',
@@ -258,297 +216,362 @@ const FeeManagement = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900">Fee Management</h1>
-        <button
-          onClick={() => handleOpen()}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center space-x-2"
-        >
-          <Plus className="w-5 h-5" />
-          <span>Add Fee</span>
-        </button>
-      </div>
-
-      {/* Filter Section */}
-      <div className="bg-white p-4 rounded-lg shadow">
-        <div className="flex items-center space-x-4">
-          <Filter className="w-5 h-5 text-gray-500" />
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Filter by Organization</label>
-            <select
-              value={selectedOrg}
-              onChange={(e) => setSelectedOrg(e.target.value)}
-              className="border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+    <div className="min-h-screen bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between bg-white rounded-2xl shadow-lg p-6 border-l-8 border-red-800">
+            <div className="flex items-center space-x-4">
+              <div className="bg-gradient-to-br from-red-800 to-red-900 p-3 rounded-xl">
+                <Filter className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Fee Management</h1>
+                <p className="text-gray-600 mt-1">University of 127 Fee Directory</p>
+              </div>
+            </div>
+            <button
+              onClick={() => handleOpen()}
+              className="bg-gradient-to-r from-red-800 to-red-900 hover:from-red-900 hover:to-red-800 text-white px-6 py-3 rounded-xl flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
             >
-              <option value="">All Organizations</option>
-              {organizations.map((org) => (
-                <option key={org.organizationId} value={org.organizationId}>
-                  {org.name}
-                </option>
-              ))}
-            </select>
+              <Plus className="w-5 h-5" />
+              <span className="font-semibold">Add Fee</span>
+            </button>
           </div>
         </div>
-      </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Transaction ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Organization</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Semester</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Academic Year</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Date</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Late Payment</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {Array.isArray(filteredFees) && filteredFees.map((fee) => (
-                <tr key={fee.transactionId} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{fee.transactionId}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {getMemberName(fee.studentNumber)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {getOrganizationName(fee.organizationId)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₱{fee.amount}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{fee.type}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{fee.semester}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{fee.academicYear}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      fee.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
-                      {fee.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {fee.status === 'paid' ? (fee.paymentDate || 'N/A') : '-'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {fee.status === 'paid' ? (
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        fee.isLate ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800'
-                      }`}>
-                        {fee.isLate ? 'Late' : 'On Time'}
-                      </span>
-                    ) : '-'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleOpen(fee)}
-                        className="text-blue-600 hover:text-blue-700"
-                      >
-                        <Edit2 className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(fee.transactionId)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {open && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">
-                {editingFee ? 'Edit Fee' : 'Add Fee'}
-              </h3>
-            </div>
-            <div className="p-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Transaction ID</label>
-                  <input
-                    type="text"
-                    name="transactionId"
-                    value={formData.transactionId}
-                    onChange={handleChange}
-                    disabled={!!editingFee}
-                    required
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
+        {/* Filter and Search Section */}
+        <div className="mb-6">
+          <div className="bg-white rounded-xl shadow-lg p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Search className="h-5 w-5 text-gray-400" />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Organization</label>
-                  <select
-                    name="organizationId"
-                    value={formData.organizationId}
-                    onChange={handleChange}
-                    required
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Select Organization</option>
-                    {organizations.map((org) => (
-                      <option key={org.organizationId} value={org.organizationId}>
-                        {org.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Student</label>
-                  <select
-                    name="studentNumber"
-                    value={formData.studentNumber}
-                    onChange={handleChange}
-                    required
-                    disabled={!formData.organizationId}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
-                  >
-                    <option value="">
-                      {formData.organizationId ? 'Select Student' : 'Select Organization First'}
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search by transaction ID, student name, or organization..."
+                  className="block w-full pl-12 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent bg-gray-50 transition-all duration-200"
+                />
+              </div>
+              <div>
+                <select
+                  value={selectedOrg}
+                  onChange={(e) => setSelectedOrg(e.target.value)}
+                  className="block w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent bg-gray-50 transition-all duration-200"
+                >
+                  <option value="">All Organizations</option>
+                  {organizations.map((org) => (
+                    <option key={org.organizationId} value={org.organizationId}>
+                      {org.name}
                     </option>
-                    {filteredMembers.map((member) => (
-                      <option key={member.studentNumber} value={member.studentNumber}>
-                        {member.name} ({member.studentNumber})
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Fees Table */}
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+          <div className="bg-gradient-to-r from-red-800 to-red-900 px-6 py-4">
+            <h2 className="text-xl font-semibold text-white">
+              Fee Directory ({filteredFees.length} {filteredFees.length === 1 ? 'fee' : 'fees'})
+            </h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Transaction ID</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Student</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Organization</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Amount</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Type</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Semester</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Academic Year</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Payment Date</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Late Payment</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-100">
+                {filteredFees.length === 0 ? (
+                  <tr>
+                    <td colSpan="11" className="px-6 py-12 text-center text-gray-500">
+                      <Filter className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                      <p className="text-lg font-medium">No fees found</p>
+                      <p className="text-sm">Add your first fee to get started</p>
+                    </td>
+                  </tr>
+                ) : (
+                  filteredFees.map((fee, index) => (
+                    <tr key={fee.transactionId} className={`hover:bg-red-50 transition-colors duration-150 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm font-mono text-red-800 bg-red-100 px-2 py-1 rounded-md">{fee.transactionId}</span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-semibold text-gray-900">{getMemberName(fee.studentNumber)}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-700">{getOrganizationName(fee.organizationId)}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-700">₱{fee.amount}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {fee.type}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-700">{fee.semester}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-700">{fee.academicYear}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          fee.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {fee.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                        {fee.status === 'paid' ? (fee.paymentDate ? new Date(fee.paymentDate).toLocaleDateString() : 'N/A') : 
+                          <span className="text-gray-400 italic">Not paid</span>
+                        }
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {fee.status === 'paid' ? (
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            fee.isLate ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800'
+                          }`}>
+                            {fee.isLate ? 'Late' : 'On Time'}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400 italic">N/A</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => handleOpen(fee)}
+                            className="p-2 text-amber-600 hover:text-amber-800 hover:bg-amber-50 rounded-lg transition-all duration-150"
+                            title="Edit fee"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(fee.transactionId)}
+                            className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-150"
+                            title="Delete fee"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Modal */}
+        {open && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="bg-gradient-to-r from-red-800 to-red-900 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+                <h3 className="text-xl font-semibold text-white">
+                  {editingFee ? 'Edit Fee' : 'Add New Fee'}
+                </h3>
+                <button
+                  onClick={handleClose}
+                  className="text-white hover:text-gray-200 p-1 rounded-lg hover:bg-red-700 transition-colors duration-150"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              <div className="p-6 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Transaction ID</label>
+                    <input
+                      type="text"
+                      name="transactionId"
+                      value={formData.transactionId}
+                      onChange={handleChange}
+                      disabled={!!editingFee}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent transition-all duration-200 disabled:bg-gray-100 disabled:text-gray-500"
+                      placeholder="e.g., FEE-2023-001"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Organization</label>
+                    <select
+                      name="organizationId"
+                      value={formData.organizationId}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent transition-all duration-200"
+                    >
+                      <option value="">Select Organization</option>
+                      {organizations.map((org) => (
+                        <option key={org.organizationId} value={org.organizationId}>
+                          {org.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Student</label>
+                    <select
+                      name="studentNumber"
+                      value={formData.studentNumber}
+                      onChange={handleChange}
+                      required
+                      disabled={!formData.organizationId}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent transition-all duration-200 disabled:bg-gray-100 disabled:text-gray-500"
+                    >
+                      <option value="">
+                        {formData.organizationId ? 'Select Student' : 'Select Organization First'}
                       </option>
-                    ))}
-                  </select>
-                  {/* Debug info */}
-                  <div className="mt-1 text-xs text-gray-500">
+                      {filteredMembers.map((member) => (
+                        <option key={member.studentNumber} value={member.studentNumber}>
+                          {member.name} ({member.studentNumber})
+                        </option>
+                      ))}
+                    </select>
                     {formData.organizationId && (
-                      <>
+                      <div className="mt-1 text-xs text-gray-500">
                         Found {filteredMembers.length} members in this organization
-                      </>
+                      </div>
                     )}
                   </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Amount</label>
+                    <input
+                      type="number"
+                      name="amount"
+                      value={formData.amount}
+                      onChange={handleChange}
+                      required
+                      min="0"
+                      step="0.01"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent transition-all duration-200"
+                      placeholder="e.g., 500.00"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Type</label>
+                    <select
+                      name="type"
+                      value={formData.type}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent transition-all duration-200"
+                    >
+                      <option value="">Select Type</option>
+                      <option value="Membership">Membership</option>
+                      <option value="Event">Event</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Semester</label>
+                    <select
+                      name="semester"
+                      value={formData.semester}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent transition-all duration-200"
+                    >
+                      <option value="">Select Semester</option>
+                      <option value="1st Semester">1st Semester</option>
+                      <option value="2nd Semester">2nd Semester</option>
+                      <option value="Midyear">Midyear</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Academic Year</label>
+                    <input
+                      type="text"
+                      name="academicYear"
+                      value={formData.academicYear}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent transition-all duration-200"
+                      placeholder="e.g., 2023-2024"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Status</label>
+                    <select
+                      name="status"
+                      value={formData.status}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent transition-all duration-200"
+                    >
+                      <option value="unpaid">Unpaid</option>
+                      <option value="paid">Paid</option>
+                    </select>
+                  </div>
+                  {formData.status === 'paid' && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">Payment Date</label>
+                        <input
+                          type="date"
+                          name="paymentDate"
+                          value={formData.paymentDate}
+                          onChange={handleChange}
+                          required
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent transition-all duration-200"
+                        />
+                      </div>
+                      <div className="flex items-center mt-4">
+                        <input
+                          type="checkbox"
+                          name="isLate"
+                          checked={formData.isLate}
+                          onChange={handleChange}
+                          className="h-4 w-4 text-red-800 focus:ring-red-800 border-gray-300 rounded"
+                        />
+                        <label className="ml-2 block text-sm font-semibold text-gray-700">
+                          Late Payment
+                        </label>
+                      </div>
+                    </>
+                  )}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Amount</label>
-                  <input
-                    type="number"
-                    name="amount"
-                    value={formData.amount}
-                    onChange={handleChange}
-                    required
-                    min="0"
-                    step="0.01"
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Type</label>
-                  <select
-                    name="type"
-                    value={formData.type}
-                    onChange={handleChange}
-                    required
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                  <button
+                    type="button"
+                    onClick={handleClose}
+                    className="px-6 py-3 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all duration-200"
                   >
-                    <option value="">Select Type</option>
-                    <option value="Membership">Membership</option>
-                    <option value="Event">Event</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Semester</label>
-                  <select
-                    name="semester"
-                    value={formData.semester}
-                    onChange={handleChange}
-                    required
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    className="px-6 py-3 bg-gradient-to-r from-red-800 to-red-900 hover:from-red-900 hover:to-red-800 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
                   >
-                    <option value="">Select Semester</option>
-                    <option value="1st Semester">1st Semester</option>
-                    <option value="2nd Semester">2nd Semester</option>
-                    <option value="Midyear">Midyear</option>
-                  </select>
+                    {editingFee ? 'Update Fee' : 'Add Fee'}
+                  </button>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Academic Year</label>
-                  <input
-                    type="text"
-                    name="academicYear"
-                    value={formData.academicYear}
-                    onChange={handleChange}
-                    required
-                    placeholder="e.g., 2023-2024"
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Status</label>
-                  <select
-                    name="status"
-                    value={formData.status}
-                    onChange={handleChange}
-                    required
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="unpaid">Unpaid</option>
-                    <option value="paid">Paid</option>
-                  </select>
-                </div>
-                {formData.status === 'paid' && (
-                  <>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Payment Date</label>
-                      <input
-                        type="date"
-                        name="paymentDate"
-                        value={formData.paymentDate}
-                        onChange={handleChange}
-                        required={formData.status === 'paid'}
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </div>
-                    <div className="flex items-center mt-8">
-                      <input
-                        type="checkbox"
-                        name="isLate"
-                        checked={formData.isLate}
-                        onChange={handleChange}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <label className="ml-2 block text-sm font-medium text-gray-700">
-                        Late Payment
-                      </label>
-                    </div>
-                  </>
-                )}
-              </div>
-              <div className="flex justify-end space-x-3 pt-4">
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {editingFee ? 'Update' : 'Add'}
-                </button>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
