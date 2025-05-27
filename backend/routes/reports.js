@@ -436,14 +436,15 @@ router.get('/8', async (req, res) => {
         where: {
           status: 'alumni'
         }
-      }
+      },
+      attributes: []
     }],
     where: {
       dateGraduated: {
         [Op.lte]: date
       }
     },
-    attributes: ['studentNumber', 'name', 'degreeProgram'],
+    attributes: ['studentNumber', 'name', 'degreeProgram', 'dateGraduated'],
     order: [['dateGraduated', 'ASC']]
     });
 
