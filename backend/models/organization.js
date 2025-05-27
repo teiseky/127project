@@ -40,7 +40,7 @@ const Organization = sequelize.define('Organization', {
     allowNull: true
   },
   status: {
-    type: DataTypes.ENUM('active', 'inactive'),
+    type: DataTypes.ENUM('active', 'inactive', 'alumni', 'expelled', 'suspended'),
     defaultValue: 'active'
   },
   foundedDate: {

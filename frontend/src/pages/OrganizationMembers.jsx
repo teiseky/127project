@@ -355,6 +355,9 @@ const OrganizationMembers = () => {
                 >
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
+                  <option value="suspended">Suspended</option>
+                  <option value="expelled">Expelled</option>
+                  <option value="alumni">Alumni</option>
                 </select>
               </div>
               <div>

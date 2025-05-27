@@ -355,44 +355,58 @@ router.get('/6', async (req, res) => {
   }
 });
 
-// 7. View percentage of active vs inactive members
+// 7. View percentage of active vs inactive members for the last n semesters 
 router.get('/7', async (req, res) => {
   try {
     const { organization, n } = req.query;
-    
+
     if (!organization || !n) {
-      return res.status(400).json({ 
-        error: 'Organization and number of semesters (n) are required' 
+      return res.status(400).json({
+        error: 'Organization and number of semesters (n) are required'
       });
     }
 
-    const result = await sequelize.query(`
-      SELECT  
-        s.Status, 
-        COUNT(*) * 100 / SUM(COUNT(*)) OVER() AS "Percentage"
-      FROM 
-        SERVES_IN s
-      JOIN 
-        ORGANIZATION o ON s.Organization_id = o.Organization_id
-      JOIN (
-        SELECT Semester, Academic_year
-        FROM SERVES_IN
-        WHERE Organization_id = (SELECT Organization_id FROM ORGANIZATION WHERE Name = :organization)
-        GROUP BY Academic_year, Semester
-        ORDER BY Academic_year DESC 
-        LIMIT :n
-      ) AS recent_semesters
-      ON s.Semester = recent_semesters.Semester 
-         AND s.Academic_year = recent_semesters.Academic_year
-      WHERE 
-        o.Name = :organization AND
-        s.Status IN ('active', 'inactive')  
-      GROUP BY 
-        s.Status
-    `, {
-      replacements: { organization, n: parseInt(n) },
-      type: sequelize.QueryTypes.SELECT
+    // Get all grouped semesters
+    const allSemesters = await ServesIn.findAll({
+      where: { organizationId: organization },
+      attributes: ['semester', 'academicYear'],
+      group: ['semester', 'academicYear'],
+      order: [
+        ['academicYear', 'DESC'],
+        ['semester', 'DESC']
+      ],
+      raw: true
     });
+
+    // Get only last n
+    const recentSemesters = allSemesters.slice(0, parseInt(n));
+
+    if (!recentSemesters.length) {
+      return res.json([]);
+    }
+
+    // Query records from recent semesters
+    const records = await ServesIn.findAll({
+      where: {
+        organizationId: organization,
+        status: ['active', 'inactive'],
+        [Op.or]: recentSemesters
+      },
+      attributes: ['status'],
+      raw: true
+    });
+
+    // Count totals
+    const counts = records.reduce((acc, record) => {
+      acc[record.status] = (acc[record.status] || 0) + 1;
+      return acc;
+    }, {});
+
+    const total = Object.values(counts).reduce((a, b) => a + b, 0);
+    const result = Object.entries(counts).map(([status, count]) => ({
+      status,
+      percentage: (count / total) * 100
+    }));
 
     res.json(result);
   } catch (error) {
@@ -404,6 +418,7 @@ router.get('/7', async (req, res) => {
 router.get('/8', async (req, res) => {
   try {
     const { organization, date } = req.query;
+    console.log('Query:', req.query);
     
     if (!organization || !date) {
       return res.status(400).json({ 
@@ -412,28 +427,27 @@ router.get('/8', async (req, res) => {
     }
 
     const members = await Member.findAll({
-      include: [{
-        model: Organization,
-        where: { name: organization },
-        through: {
-          model: ServesIn,
-          where: {
-            status: 'alumni'
-          }
-        }
-      }],
-      where: {
-        dateGraduated: {
-          [Op.lte]: date
+    include: [{
+      model: Organization,
+      as: 'Organizations',  // use alias
+      where: { organizationId: organization },
+      through: {
+        model: ServesIn,
+        where: {
+          status: 'alumni'
         }
       },
-      attributes: [
-        'studentNumber',
-        'name',
-        'degreeProgram'
-      ],
-      order: [['dateGraduated', 'ASC']]
+      attributes: []
+    }],
+    where: {
+      dateGraduated: {
+        [Op.lte]: date
+      }
+    },
+    attributes: ['studentNumber', 'name', 'degreeProgram', 'dateGraduated'],
+    order: [['dateGraduated', 'ASC']]
     });
+
 
     res.json(members);
   } catch (error) {
@@ -455,7 +469,7 @@ router.get('/9', async (req, res) => {
     const result = await Fee.findAll({
       include: [{
         model: Organization,
-        where: { name: organization }
+        where: { organizationId: organization }
       }],
       where: {
         paymentDate: {
@@ -492,7 +506,7 @@ router.get('/10', async (req, res) => {
         attributes: ['studentNumber', 'name']
       }, {
         model: Organization,
-        where: { name: organization }
+        where: { organizationId: organization }
       }],
       where: {
         semester,
