@@ -165,7 +165,7 @@ const Login = () => {
         {/* Footer */}
         <div className="text-center mt-8">
           <p className="text-gray-600 text-sm">
-            © 2024 University of CMSC 127. All rights reserved.
+            © 2025 University of CMSC 127. All rights reserved.
           </p>
         </div>
       </div>
